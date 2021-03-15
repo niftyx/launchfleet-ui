@@ -45,16 +45,16 @@ const themesOptions = [
       MuiButton: {
         root: {
           padding: "12px 16px",
-          borderRadius: "6px",
+          borderRadius: "16px",
+          fontWeight: 300,
+          textTransform: "none",
         },
-        contained: {
-          boxShadow: "none",
-          "&:hover": {
-            color: "#000",
-            backgroundColor: `#fff !important`,
-            fill: "#000",
-            borderColor: "#fff !important",
-          },
+        containedPrimary: {
+          backgroundColor: "#016ACF",
+          color: "#fff",
+        },
+        containedSecondary: {
+          color: "#016ACF",
         },
       },
     },
@@ -62,7 +62,7 @@ const themesOptions = [
       type: "dark",
       action: {
         active: "rgba(255, 255, 255, 0.54)",
-        hover: "#212121",
+        hover: "#016ACFaa",
         selected: "rgba(255, 255, 255, 0.08)",
         disabled: "rgba(255, 255, 255, 0.26)",
         disabledBackground: "rgba(255, 255, 255, 0.12)",
@@ -100,17 +100,16 @@ const themesOptions = [
       MuiButton: {
         root: {
           padding: "12px 16px",
-          borderRadius: "6px",
-          border: "1px solid",
+          borderRadius: "16px",
+          fontWeight: 300,
+          textTransform: "none",
         },
-        contained: {
-          boxShadow: "none",
-          "&:hover": {
-            color: "#FFFFFF",
-            backgroundColor: `#000 !important`,
-            fill: "#FFFFFF",
-            borderColor: "#000 !important",
-          },
+        containedPrimary: {
+          backgroundColor: "#016ACF",
+          color: "#fff",
+        },
+        containedSecondary: {
+          color: "#016ACF",
         },
       },
     },
@@ -118,7 +117,7 @@ const themesOptions = [
       type: "light",
       action: {
         active: "rgba(255, 255, 255, 0.54)",
-        hover: "#212121",
+        hover: "#016ACFaa",
         selected: "rgba(255, 255, 255, 0.08)",
         disabled: "rgba(255, 255, 255, 0.26)",
         disabledBackground: "rgba(255, 255, 255, 0.12)",
@@ -128,16 +127,17 @@ const themesOptions = [
         default: "#fff",
         dark: "#212121",
         paper: "#ffeaef",
+        light: "#016ACF",
       },
       primary: {
-        main: "#ff3465",
+        main: "#1A202E",
       },
       secondary: {
         main: "#fff",
       },
       text: {
         primary: "#000",
-        secondary: "#ff3465",
+        secondary: "#1A202E",
       },
     },
     shadows: softShadows,

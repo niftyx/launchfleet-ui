@@ -12,15 +12,14 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     left: 0,
     right: 0,
-    top: 60,
+    top: 100,
     boxShadow: `0 10px 20px ${transparentize(0.8, theme.colors.opposite)}`,
   },
   content: {
     zIndex: 1,
   },
   menuContent: {
-    padding: "12px 32px 32px",
-
+    padding: "24px",
     backgroundColor: theme.colors.default,
     "& > * + *": {
       marginTop: 8,
@@ -29,9 +28,11 @@ const useStyles = makeStyles((theme) => ({
   pools: {
     height: 50,
     display: "flex",
+    width: "100%",
   },
   connectWallet: {
     height: 50,
+    width: "100%",
   },
 }));
 
@@ -72,7 +73,6 @@ export const Navbar = (props: IProps) => {
           ) : (
             <ConnectWalletButton
               className={classes.connectWallet}
-              fullWidth
               onClick={onConnectWallet}
             />
           )}

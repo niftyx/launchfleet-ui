@@ -9,6 +9,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     overflowY: "auto",
     minHeight: "100vh",
+    backgroundColor: theme.colors.thirteen,
   },
   content: {},
 }));

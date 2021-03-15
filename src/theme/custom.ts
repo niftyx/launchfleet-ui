@@ -1,7 +1,8 @@
 const custom = {
-  appHeaderDesktopHeight: 72,
-  appHeaderMobileHeight: 52,
-  appContentMaxWidth: 1160,
+  appHeaderDesktopHeight: 110,
+  appHeaderMobileHeight: 100,
+  appContentMaxWidth: 1105,
+  padWidth: 768,
 };
 
 export default custom;

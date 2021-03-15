@@ -9,8 +9,6 @@ import {
 import { ZERO_ADDRESS } from "utils/token";
 import { entries } from "utils/type-utils";
 
-import { POOLZ_AVAX_MAIN, POOLZ_AVAX_TEST } from "./constants";
-
 export const networkIds = {
   AVAXTEST: 43113,
   AVAXMAIN: 43114,
@@ -21,7 +19,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     label: "Kovan",
     url: "https://api.avax-test.network/ext/bc/C/rpc",
     contracts: {
-      poolz: POOLZ_AVAX_TEST,
+      poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
     },
     etherscanUri: "https://cchain.explorer.avax-test.network/",
   },
@@ -29,7 +27,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     label: "Kovan",
     url: "https://api.avax.network/ext/bc/C/rpc",
     contracts: {
-      poolz: POOLZ_AVAX_MAIN,
+      poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
     },
     etherscanUri: "https://cchain.explorer.avax.network/",
   },

@@ -1,14 +1,19 @@
 import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    color: theme.colors.primary,
-    height: "100%",
-    fontSize: 24,
+    height: 40,
     display: "flex",
     alignItems: "center",
+    cursor: "pointer",
+    userSelect: "none",
+    textDecoration: "none",
+  },
+  img: {
+    height: "100%",
   },
 }));
 
@@ -18,5 +23,9 @@ interface IProps {
 
 export const Logo = (props: IProps) => {
   const classes = useStyles();
-  return <div className={clsx(classes.root, props.className)}>Snowstorm</div>;
+  return (
+    <NavLink className={clsx(classes.root, props.className)} to="/">
+      <img alt="logo" className={classes.img} src="/imgs/logo.png" />
+    </NavLink>
+  );
 };

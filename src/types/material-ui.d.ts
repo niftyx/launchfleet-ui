@@ -6,15 +6,29 @@ declare module "@material-ui/core/styles/createMuiTheme" {
       appHeaderDesktopHeight: React.CSSProperties["height"];
       appHeaderMobileHeight: React.CSSProperties["height"];
       appContentMaxWidth: React.CSSProperties["width"];
+      padWidth: number;
     };
     colors: {
       transparent: string;
       default: string;
+      opposite: string;
       primary: string;
       secondary: string;
       third: string;
       fourth: string;
-      opposite: string;
+      fifth: string;
+      sixth: string;
+      seventh: string;
+      eighth: string;
+      ninth: string;
+      tenth: string;
+      eleventh: string;
+      twelfth: string;
+      thirteen: string;
+      fourteen: string;
+      warn: string;
+      gradient1: string;
+      gradient2: string;
     };
   }
   // allow configuration using `createMuiTheme`
@@ -23,15 +37,29 @@ declare module "@material-ui/core/styles/createMuiTheme" {
       appHeaderDesktopHeight: React.CSSProperties["height"];
       appHeaderMobileHeight: React.CSSProperties["height"];
       appContentMaxWidth: React.CSSProperties["width"];
+      padWidth: number;
     };
     colors: {
       transparent: string;
       default: string;
+      opposite: string;
       primary: string;
       secondary: string;
       third: string;
       fourth: string;
-      opposite: string;
+      fifth: string;
+      sixth: string;
+      seventh: string;
+      eighth: string;
+      ninth: string;
+      tenth: string;
+      eleventh: string;
+      twelfth: string;
+      thirteen: string;
+      fourteen: string;
+      warn: string;
+      gradient1: string;
+      gradient2: string;
     };
   }
 }

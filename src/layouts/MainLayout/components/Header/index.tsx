@@ -1,28 +1,30 @@
-import { Button, Hidden, IconButton, makeStyles } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import SettingsIcon from "@material-ui/icons/Settings";
+import { Hidden, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import {
   AccountInfoBar,
   ConnectWalletButton,
   Logo,
+  MenuButton,
+  NewPoolButton,
   PoolsButton,
+  SettingsButton,
 } from "components";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import useCommonStyles from "styles/common";
 
 import { Navbar } from "../Navbar";
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    zIndex: 2,
     overflowY: "visible",
     height: theme.custom.appHeaderDesktopHeight,
-    padding: "12px 30px",
-    backgroundColor: theme.colors.default,
-    borderBottom: `1px solid ${theme.colors.secondary}`,
+    backgroundColor: theme.colors.transparent,
     position: "relative",
-    [theme.breakpoints.down("sm")]: {
+    padding: "16px 24px",
+    [theme.breakpoints.down(theme.custom.padWidth)]: {
       height: theme.custom.appHeaderMobileHeight,
     },
   },
@@ -31,23 +33,26 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     maxWidth: theme.custom.appContentMaxWidth,
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
-  },
-  contentRight: {
-    display: "flex",
-    alignItems: "center",
-    height: "100%",
     "& > * + *": {
-      marginLeft: 8,
+      marginLeft: 24,
     },
   },
-  menuButton: {
-    display: "inline-flex",
+  section: {
+    flex: 1,
+    display: "flex",
     alignItems: "center",
-    fontSize: 32,
-    cursor: "pointer",
-    color: theme.colors.opposite,
+    justifyContent: "space-between",
+  },
+  settingsWalletWrapper: {
+    display: "flex",
+    alignItems: "center",
+    "& > * + *": {
+      marginLeft: 32,
+    },
+  },
+  pools: {
+    marginRight: 32,
   },
 }));
 
@@ -61,6 +66,7 @@ interface IState {
 
 export const Header = (props: IProps) => {
   const classes = useStyles();
+  const commonClasses = useCommonStyles();
   const [state, setState] = useState<IState>({ navbarOpened: false });
   const history = useHistory();
 
@@ -90,25 +96,24 @@ export const Header = (props: IProps) => {
   return (
     <div className={clsx(classes.root, props.className)}>
       <div className={classes.content}>
-        <Logo />
-        <div className={classes.contentRight}>
-          <Hidden smDown>
-            <PoolsButton />
+        <div className={classes.section}>
+          <MenuButton className={commonClasses.hideUpPad} onClick={onMenu} />
+          <Logo className={commonClasses.hideOnPad} />
+          <NewPoolButton className={commonClasses.hideOnMobile} />
+        </div>
+        <div className={classes.section}>
+          <PoolsButton
+            className={clsx(classes.pools, commonClasses.hideOnPad)}
+          />
 
+          <div className={classes.settingsWalletWrapper}>
+            <SettingsButton className={commonClasses.hideOnMobile} />
             {isConnected ? (
               <AccountInfoBar account={account || ""} ethBalance={ethBalance} />
             ) : (
               <ConnectWalletButton onClick={onConnectWallet} />
             )}
-            {/* <IconButton>
-              <SettingsIcon />
-            </IconButton> */}
-          </Hidden>
-          <Hidden mdUp>
-            <span className={classes.menuButton} onClick={onMenu}>
-              <MenuIcon />
-            </span>
-          </Hidden>
+          </div>
         </div>
       </div>
       <Hidden mdUp>

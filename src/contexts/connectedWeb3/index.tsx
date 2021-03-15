@@ -1,10 +1,14 @@
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { STORAGE_KEY_CONNECTOR } from "config/constants";
+import { NETWORK_CONFIG, STORAGE_KEY_CONNECTOR } from "config/constants";
 import React, { useEffect, useState } from "react";
 import { Maybe } from "types";
+import { waitSeconds } from "utils";
 import connectors from "utils/connectors";
 import { ConnectorNames } from "utils/enums";
+import { getLogger } from "utils/logger";
+
+const logger = getLogger("useConnectedWeb3Context::");
 export interface ConnectedWeb3Context {
   account: Maybe<string> | null;
   library: Web3Provider | undefined;
@@ -78,10 +82,16 @@ export const ConnectedWeb3: React.FC = (props) => {
     // eslint-disable-next-line
   }, [context, library, active, error]);
 
-  const onConnect = () => {
-    const wallet = ConnectorNames.Injected;
-    context.activate(connectors[wallet]);
-    localStorage.setItem(STORAGE_KEY_CONNECTOR, wallet);
+  const onConnect = async () => {
+    try {
+      await window.ethereum.request(NETWORK_CONFIG);
+      await waitSeconds(1);
+      const wallet = ConnectorNames.Injected;
+      context.activate(connectors[wallet]);
+      localStorage.setItem(STORAGE_KEY_CONNECTOR, wallet);
+    } catch (error) {
+      logger.error(error);
+    }
   };
 
   const onDisconnect = () => {

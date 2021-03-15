@@ -1,0 +1,5 @@
+<svg id="menu-2-line"
+  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path id="Path" d="M0,0H24V24H0Z" fill="none"/>
+  <path id="Shape" d="M0,15.692V13.73H18.462v1.962ZM0,8.827V6.865H12.307V8.827ZM0,1.961V0H18.462V1.961Z" transform="translate(2.769 4.615)" fill="currentColor"/>
+</svg>

@@ -44,16 +44,6 @@ const useCommonStyles = makeStyles((theme) => ({
       opacity: 1,
     },
   },
-  hideBelowWide: {
-    [theme.breakpoints.down("sm")]: {
-      display: "none !important",
-    },
-  },
-  showBelowWide: {
-    [theme.breakpoints.up("md")]: {
-      display: "none !important",
-    },
-  },
   maxHeightTransition: {
     overflow: "hidden",
     maxHeight: 0,
@@ -62,6 +52,28 @@ const useCommonStyles = makeStyles((theme) => ({
       maxHeight: 2000,
       transition: "max-height 1s ease-in-out",
     },
+  },
+  hideOnMobile: {
+    [theme.breakpoints.down("xs")]: {
+      display: "none !important",
+    },
+  },
+  hideOnPad: {
+    [theme.breakpoints.down(theme.custom.padWidth)]: {
+      display: "none !important",
+    },
+  },
+  hideUpPad: {
+    [theme.breakpoints.up(theme.custom.padWidth)]: {
+      display: "none !important",
+    },
+  },
+  wrapper: {
+    padding: "16px 24px",
+  },
+  pageContent: {
+    maxWidth: theme.custom.appContentMaxWidth,
+    margin: "auto",
   },
 }));
 
