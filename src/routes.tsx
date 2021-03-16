@@ -5,7 +5,7 @@ import { Redirect, Route, Switch } from "react-router-dom";
 
 const routes = [
   {
-    exact: true,
+    exact: false,
     path: "/",
     layout: MainLayout,
     routes: [
@@ -13,6 +13,11 @@ const routes = [
         exact: true,
         path: "/",
         component: lazy(() => import("pages/HomePage")),
+      },
+      {
+        exact: false,
+        path: "/pools",
+        component: lazy(() => import("pages/PoolsPage")),
       },
     ],
   },
