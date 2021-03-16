@@ -5,21 +5,21 @@ const useCommonStyles = makeStyles((theme) => ({
   scroll: {
     "&::-webkit-scrollbar": {
       width: theme.spacing(0.5),
-      boxShadow: `inset 0 0 6px ${transparentize(0.3, theme.colors.fourth)}`,
+      boxShadow: theme.colors.boxShadow1,
     },
     "&::-webkit-scrollbar-track": {},
     "&::-webkit-scrollbar-thumb": {
-      backgroundColor: theme.colors.fourth,
+      backgroundColor: transparentize(0.3, theme.colors.primary),
     },
   },
   scrollHorizontal: {
     "&::-webkit-scrollbar": {
       height: theme.spacing(0.25),
-      boxShadow: `inset 0 0 6px ${transparentize(0.3, theme.colors.fourth)}`,
+      boxShadow: theme.colors.boxShadow1,
     },
     "&::-webkit-scrollbar-track": {},
     "&::-webkit-scrollbar-thumb": {
-      backgroundColor: theme.colors.fourth,
+      backgroundColor: theme.colors.primary,
     },
   },
   transparentButton: {

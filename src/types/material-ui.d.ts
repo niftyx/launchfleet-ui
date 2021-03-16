@@ -26,9 +26,11 @@ declare module "@material-ui/core/styles/createMuiTheme" {
       twelfth: string;
       thirteen: string;
       fourteen: string;
+      fifteen: string;
       warn: string;
       gradient1: string;
       gradient2: string;
+      boxShadow1: string;
     };
   }
   // allow configuration using `createMuiTheme`
@@ -57,9 +59,11 @@ declare module "@material-ui/core/styles/createMuiTheme" {
       twelfth: string;
       thirteen: string;
       fourteen: string;
+      fifteen: string;
       warn: string;
       gradient1: string;
       gradient2: string;
+      boxShadow1: string;
     };
   }
 }

@@ -21,11 +21,13 @@ const colors = [
       twelfth: "#161D84",
       thirteen: "#F8F8FD",
       fourteen: "#474B6F",
+      fifteen: "#343DCE",
       warn: "#C81E1E",
       gradient1:
         "linear-gradient(270deg, rgba(72,183,255,1) 0%, rgba(28,55,172,1) 100%)",
       gradient2:
         "linear-gradient(300deg, rgba(241,242,240,1) 0%, rgba(229,234,247,1) 50%, rgba(231,234,248,1) 100%)",
+      boxShadow1: "0 0 1px 0 rgb(0 0 0 / 31%), 0 2px 2px -2px rgb(0 0 0 / 25%)",
     },
   },
   {
@@ -48,11 +50,13 @@ const colors = [
       twelfth: "#161D84",
       thirteen: "#F8F8FD",
       fourteen: "#474B6F",
+      fifteen: "#343DCE",
       warn: "#C81E1E",
       gradient1:
         "linear-gradient(270deg, rgba(72,183,255,1) 0%, rgba(28,55,172,1) 100%)",
       gradient2:
         "linear-gradient(299deg, rgba(241,242,240,1) 0%, rgba(229,234,247,1) 50%, rgba(231,234,248,1) 100%)",
+      boxShadow1: "0 0 1px 0 rgb(0 0 0 / 31%), 0 2px 2px -2px rgb(0 0 0 / 25%)",
     },
   },
 ];

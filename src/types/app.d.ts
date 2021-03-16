@@ -44,8 +44,6 @@ export interface IKnownTokenData {
 }
 
 export interface IGlobalData {
-  itemCartIds: string[];
-  inventoryCartIds: string[];
   price: {
     [key in KnownToken]: {
       usd: number;
@@ -54,4 +52,37 @@ export interface IGlobalData {
     };
   };
   ethBalance: BigNumber;
+}
+
+export interface IBasePool {
+  token: string; //token to sell address
+  auctionFinishTimestamp: BigNumber; //Until what time the pool will work
+  expectedRate: BigNumber; //the rate of the trade
+  pozRate: BigNumber; //the rate for POZ Holders, how much each token = main coin
+  startAmount: BigNumber; //Total amount of the tokens to sell in the pool
+  lockedUntil: number; //False = DSP or True = TLP
+  mainCoin: string; // address(0x0) = ETH, address of main token
+  is21Decimal: boolean; //focus the for smaller tokens.
+  now: BigNumber; // start time
+  whitelistId: BigNumber; // the Id of the Whitelist contract, 0 For turn-off
+}
+
+export interface IPool {
+  token: string;
+  creator: string;
+  finishTime: BigNumber;
+  rate: BigNumber;
+  pozRate: BigNumber;
+  mainCoin: string;
+  startAmount: BigNumber;
+  isLocked: boolean;
+  leftTokens: BigNumber;
+  startTime: BigNumber;
+  openForAll: BigNumber;
+  unlockedTokens: BigNumber;
+  tookLeftOvers: boolean;
+  is21DecimalRate: boolean;
+  img?: string;
+  tokenName: string;
+  tokenSymbol: string;
 }

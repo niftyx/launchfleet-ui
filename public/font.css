@@ -16,14 +16,16 @@
 }
 
 
+
 @font-face {
   font-family: 'CircularStd';
   font-weight: 500;
-  src: local('CircularStd'), url(fonts/CircularStd-Black.woff) format('woff');
+  src: local('CircularStd'), url(fonts/CircularStd-Bold.woff) format('woff');
 }
+
 
 @font-face {
   font-family: 'CircularStd';
   font-weight: 600;
-  src: local('CircularStd'), url(fonts/CircularStd-Bold.woff) format('woff');
+  src: local('CircularStd'), url(fonts/CircularStd-Black.woff) format('woff');
 }

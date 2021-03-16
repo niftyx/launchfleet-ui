@@ -1,10 +1,7 @@
 import { Typography, makeStyles } from "@material-ui/core";
-import { ReactComponent as DiscordIcon } from "assets/svgs/discord.svg";
-import { ReactComponent as MediumIcon } from "assets/svgs/medium.svg";
-import { ReactComponent as TelegramIcon } from "assets/svgs/telegram.svg";
-import { ReactComponent as TwitterIcon } from "assets/svgs/twitter.svg";
 import clsx from "clsx";
 import { Logo } from "components";
+import { GUIDE_LINKS, SOCIAL_LINKS } from "config/constants";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
@@ -71,11 +68,7 @@ export const Footer = (props: IProps) => {
         <div className={classes.row}>
           <Logo className={classes.logo} />
           <div className={classes.subRow}>
-            {[
-              { label: "Support", href: "/support" },
-              { label: "Docs", href: "/docs" },
-              { label: "Terms & Privacy", href: "/terms-privacy" },
-            ].map((item) => (
+            {GUIDE_LINKS.map((item) => (
               <NavLink className={classes.item} key={item.label} to={item.href}>
                 {item.label}
               </NavLink>
@@ -87,12 +80,7 @@ export const Footer = (props: IProps) => {
             © Avalaunch 2021. Join the auction at your own risk.
           </Typography>
           <div className={classes.subRow}>
-            {[
-              { href: "/discord", icon: DiscordIcon },
-              { href: "/medium", icon: MediumIcon },
-              { href: "/telegram", icon: TelegramIcon },
-              { href: "/twitter", icon: TwitterIcon },
-            ].map((item) => {
+            {SOCIAL_LINKS.map((item) => {
               const Icon = item.icon;
               return (
                 <a

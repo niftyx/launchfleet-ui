@@ -33,8 +33,6 @@ const defaultTokenPrices = {
 };
 
 const defaultData: IGlobalData = {
-  itemCartIds: [],
-  inventoryCartIds: [],
   price: defaultTokenPrices,
   ethBalance: ZERO_NUMBER,
 };

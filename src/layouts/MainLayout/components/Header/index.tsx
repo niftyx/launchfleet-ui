@@ -89,15 +89,18 @@ export const Header = (props: IProps) => {
     onConnect();
   };
 
-  const onMenu = () => {
-    setState((prev) => ({ ...prev, navbarOpened: !prev.navbarOpened }));
+  const setMenuVisible = (navbarOpened: boolean) => {
+    setState((prev) => ({ ...prev, navbarOpened }));
   };
 
   return (
     <div className={clsx(classes.root, props.className)}>
       <div className={classes.content}>
         <div className={classes.section}>
-          <MenuButton className={commonClasses.hideUpPad} onClick={onMenu} />
+          <MenuButton
+            className={commonClasses.hideUpPad}
+            onClick={() => setMenuVisible(true)}
+          />
           <Logo className={commonClasses.hideOnPad} />
           <NewPoolButton className={commonClasses.hideOnMobile} />
         </div>
@@ -109,7 +112,11 @@ export const Header = (props: IProps) => {
           <div className={classes.settingsWalletWrapper}>
             <SettingsButton className={commonClasses.hideOnMobile} />
             {isConnected ? (
-              <AccountInfoBar account={account || ""} ethBalance={ethBalance} />
+              <AccountInfoBar
+                account={account || ""}
+                ethBalance={ethBalance}
+                onDisconnect={onDisconnect}
+              />
             ) : (
               <ConnectWalletButton onClick={onConnectWallet} />
             )}
@@ -117,7 +124,7 @@ export const Header = (props: IProps) => {
         </div>
       </div>
       <Hidden mdUp>
-        <Navbar onToggle={onMenu} visible={state.navbarOpened} />
+        <Navbar setMenuVisible={setMenuVisible} visible={state.navbarOpened} />
       </Hidden>
     </div>
   );

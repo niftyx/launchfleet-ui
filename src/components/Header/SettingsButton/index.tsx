@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "none",
     width: 48,
     height: 48,
-    boxShadow: "0 0 1px 0 rgb(0 0 0 / 31%), 0 2px 2px -2px rgb(0 0 0 / 25%)",
+    boxShadow: theme.colors.boxShadow1,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
