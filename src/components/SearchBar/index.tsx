@@ -1,21 +1,34 @@
 import {
+  Input,
   InputAdornment,
-  TextField,
-  TextFieldProps,
+  InputProps,
   makeStyles,
 } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
+import { ReactComponent as SearchSvg } from "assets/svgs/search_outline.svg";
 import clsx from "clsx";
 import { transparentize } from "polished";
 import React from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: transparentize(0.7, theme.colors.third),
+    backgroundColor: transparentize(0.75, theme.colors.sixth),
     height: 44,
     borderRadius: 8,
-    paddingLeft: 24,
-    paddingRight: 24,
+    paddingLeft: 16,
+    paddingRight: 16,
+    "& input": {
+      color: theme.colors.third,
+      fontSize: 14,
+      "&::placeholder": {
+        color: theme.colors.third,
+      },
+      "&:-ms-input-placeholder": {
+        color: theme.colors.third,
+      },
+      "&::-ms-input-placeholder": {
+        color: theme.colors.third,
+      },
+    },
   },
   icon: {
     color: theme.colors.secondary,
@@ -24,21 +37,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const SearchBar = (props: TextFieldProps) => {
+export const SearchBar = (props: InputProps) => {
   const classes = useStyles();
 
   return (
-    <TextField
+    <Input
       {...props}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon className={classes.icon} />
-          </InputAdornment>
-        ),
-      }}
       className={clsx(props.className, classes.root)}
+      disableUnderline
       fullWidth
+      placeholder="Search by pool ID, pool name, token contract"
+      startAdornment={
+        <InputAdornment position="start">
+          <SearchSvg className={classes.icon} />
+        </InputAdornment>
+      }
     />
   );
 };

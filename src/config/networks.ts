@@ -16,7 +16,7 @@ export const networkIds = {
 
 const networks: { [K in NetworkId]: INetwork } = {
   [networkIds.AVAXTEST]: {
-    label: "Kovan",
+    label: "AVAX TEST",
     url: "https://api.avax-test.network/ext/bc/C/rpc",
     contracts: {
       poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
@@ -24,7 +24,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     etherscanUri: "https://cchain.explorer.avax-test.network/",
   },
   [networkIds.AVAXMAIN]: {
-    label: "Kovan",
+    label: "AVAX Main",
     url: "https://api.avax.network/ext/bc/C/rpc",
     contracts: {
       poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
@@ -36,6 +36,12 @@ const networks: { [K in NetworkId]: INetwork } = {
 export const supportedNetworkIds = Object.keys(networks).map(
   Number
 ) as NetworkId[];
+
+export const tokenIds = {
+  avax: "avax",
+  eth: "eth",
+  usdt: "usdt",
+};
 
 export const knownTokens: { [name in KnownToken]: IKnownTokenData } = {
   avax: {

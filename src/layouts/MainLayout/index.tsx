@@ -11,7 +11,9 @@ const useStyles = makeStyles((theme) => ({
     height: "100vh",
     backgroundColor: theme.colors.thirteen,
   },
-  content: {},
+  content: {
+    minHeight: "calc(100vh - 300px)",
+  },
 }));
 
 interface IProps {

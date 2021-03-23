@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { LoadingScreen } from "components";
 import { useConnectedWeb3Context } from "contexts";
 import React, { Suspense, lazy } from "react";
-import { Route, Switch } from "react-router";
+import { Redirect, Route, Switch } from "react-router";
 import useCommonStyles from "styles/common";
 
 import { TabBar } from "./components";
@@ -34,6 +34,23 @@ const PoolsPage = () => {
                 exact
                 path="/pools/all"
               />
+              <Route
+                component={lazy(
+                  () => import("pages/PoolsPage/components/FeaturedPools")
+                )}
+                exact
+                path="/pools/featured"
+              />
+              {isConnected && (
+                <Route
+                  component={lazy(
+                    () => import("pages/PoolsPage/components/MyPools")
+                  )}
+                  exact
+                  path="/pools/mine"
+                />
+              )}
+              <Redirect path="*" to="/pools/all" />
             </Switch>
           </Suspense>
         </div>

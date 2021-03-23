@@ -1,5 +1,6 @@
 import { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
+import { LoadingScreen } from "components";
 import { NETWORK_CONFIG, STORAGE_KEY_CONNECTOR } from "config/constants";
 import React, { useEffect, useState } from "react";
 import { Maybe } from "types";
@@ -73,7 +74,10 @@ export const ConnectedWeb3: React.FC = (props) => {
     } else if (connector && Object.keys(connectors).includes(connector)) {
       if (!active) {
         activate(connectors[connector as ConnectorNames])
-          .then(() => updateInitialized())
+          .then(async () => {
+            await waitSeconds(0.1);
+            updateInitialized();
+          })
           .catch(() => updateInitialized());
       }
     } else {
@@ -111,7 +115,7 @@ export const ConnectedWeb3: React.FC = (props) => {
 
   return (
     <ConnectedWeb3Context.Provider value={value}>
-      {props.children}
+      {value.initialized ? props.children : <LoadingScreen />}
     </ConnectedWeb3Context.Provider>
   );
 };

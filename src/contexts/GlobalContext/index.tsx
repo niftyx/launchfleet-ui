@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
+import { TransactionModal } from "components";
 import { DEFAULT_USD, PRICE_DECIMALS } from "config/constants";
 import { getToken, knownTokens } from "config/networks";
 import { useConnectedWeb3Context } from "contexts/connectedWeb3";
@@ -35,12 +36,24 @@ const defaultTokenPrices = {
 const defaultData: IGlobalData = {
   price: defaultTokenPrices,
   ethBalance: ZERO_NUMBER,
+  txModalData: {
+    visible: false,
+    title: "",
+    instruction: "",
+    txId: "",
+  },
 };
 
 const GlobalContext = createContext({
   data: defaultData,
   updateData: () => {},
   fetchEthBalance: async () => {},
+  setTxModalData: (
+    visible: boolean,
+    title?: string,
+    instruction?: string,
+    txId?: string
+  ) => {},
 });
 
 /**
@@ -150,15 +163,37 @@ export const GlobalProvider = ({ children }: IProps) => {
     setCurrentData(mergedData);
   };
 
+  const setTxModalData = (
+    visible: boolean,
+    title?: string,
+    instruction?: string,
+    txId?: string
+  ) => {
+    setCurrentData((prev) => ({
+      ...prev,
+      txModalData: {
+        visible,
+        title: title || "",
+        instruction: instruction || "",
+        txId: txId || "",
+      },
+    }));
+  };
+
   return (
     <GlobalContext.Provider
       value={{
         data: currentData,
         updateData: handleUpdateData,
         fetchEthBalance,
+        setTxModalData,
       }}
     >
       {children}
+      <TransactionModal
+        {...currentData.txModalData}
+        onClose={() => setTxModalData(false)}
+      />
     </GlobalContext.Provider>
   );
 };

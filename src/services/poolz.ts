@@ -253,7 +253,7 @@ class PoolzService {
     is21Decimal: boolean,
     now: BigNumber,
     whitelistId: BigNumber
-  ): Promise<TransactionReceipt> => {
+  ): Promise<string> => {
     const transactionObject = await this.contract.CreatePool(
       token,
       finishTime,
@@ -266,7 +266,7 @@ class PoolzService {
       whitelistId
     );
     logger.log(`CreatePool transaction hash: ${transactionObject.hash}`);
-    return this.provider.waitForTransaction(transactionObject.hash);
+    return transactionObject.hash;
   };
 
   investETH = async (poolId: BigNumber): Promise<TransactionReceipt> => {

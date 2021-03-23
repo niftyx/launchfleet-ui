@@ -4,11 +4,14 @@ import { PoolCloseTimeTag, PoolRaisedTag, PrivateTag } from "components/Tag";
 import { PublicTag } from "components/Tag/PublicTag";
 import { transparentize } from "polished";
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { IPool } from "types";
 import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    display: "block",
+    textDecoration: "none",
     backgroundColor: theme.colors.default,
     padding: 24,
     border: `2px solid ${theme.colors.transparent}`,
@@ -80,8 +83,9 @@ export const UpcomingPoolItem = (props: IProps) => {
   const isPrivate = pool.openForAll.eq(ZERO_NUMBER);
 
   return (
-    <div
+    <NavLink
       className={clsx(classes.root, props.className, isClosed ? "" : "active")}
+      to={`/pool/${pool.token}`}
     >
       <div className={classes.content}>
         <div className={clsx(classes.section, classes.topWrapper)}>
@@ -114,6 +118,6 @@ export const UpcomingPoolItem = (props: IProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };

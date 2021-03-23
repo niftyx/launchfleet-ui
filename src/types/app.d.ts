@@ -52,10 +52,19 @@ export interface IGlobalData {
     };
   };
   ethBalance: BigNumber;
+  txModalData: {
+    visible: boolean;
+    title: string;
+    instruction: string;
+    txId: string;
+  };
 }
 
 export interface IBasePool {
   token: string; //token to sell address
+  tokenSymbol: string;
+  tokenDecimals: number;
+  tokenName: string;
   auctionFinishTimestamp: BigNumber; //Until what time the pool will work
   expectedRate: BigNumber; //the rate of the trade
   pozRate: BigNumber; //the rate for POZ Holders, how much each token = main coin

@@ -4,3 +4,7 @@ export * from "./Header";
 export * from "./Pool";
 export * from "./Tag";
 export * from "./SearchBar";
+export * from "./Input";
+export * from "./Form";
+export * from "./Switch";
+export * from "./Modal";

@@ -19,6 +19,22 @@ const routes = [
         path: "/pools",
         component: lazy(() => import("pages/PoolsPage")),
       },
+      {
+        exact: true,
+        path: "/pool/:id",
+        component: lazy(() => import("pages/PoolDetailsPage")),
+      },
+      {
+        exact: true,
+        path: "/new-pool",
+        component: lazy(() => import("pages/PoolCreatePage")),
+      },
+      {
+        exact: false,
+        path: "/",
+        // eslint-disable-next-line react/display-name
+        component: () => <Redirect to="/" />,
+      },
     ],
   },
   {

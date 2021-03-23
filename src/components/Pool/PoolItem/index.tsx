@@ -15,11 +15,13 @@ import {
 import { PoolJoinedStatusTag } from "components/Tag/PoolJoinedStatusTag";
 import { PublicTag } from "components/Tag/PublicTag";
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { IPool } from "types";
 import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    textDecoration: "none",
     borderRadius: 24,
     border: `1px solid ${theme.colors.transparent}`,
     padding: 24,
@@ -105,8 +107,9 @@ export const PoolItem = (props: IProps) => {
   const isPrivate = pool.openForAll.eq(ZERO_NUMBER);
 
   return (
-    <div
+    <NavLink
       className={clsx(classes.root, props.className, isClosed ? "" : "active")}
+      to={`/pool/${pool.token}`}
     >
       <Hidden mdUp>
         <div className={classes.row}>
@@ -159,6 +162,6 @@ export const PoolItem = (props: IProps) => {
           </Button>
         </div>
       </Hidden>
-    </div>
+    </NavLink>
   );
 };

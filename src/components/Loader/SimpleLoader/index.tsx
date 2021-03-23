@@ -4,10 +4,10 @@ import React from "react";
 const useStyles = makeStyles((theme) => ({
   root: {
     alignItems: "center",
-    backgroundColor: theme.palette.background.default,
     display: "flex",
     justifyContent: "center",
     padding: theme.spacing(2),
+    minHeight: 100,
   },
 }));
 
