@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   instruction: {
     marginTop: 16,
     fontSize: 14,
-    color: theme.colors.secondary,
+    color: theme.colors.third,
   },
   txLink: {
     marginTop: 16,
@@ -63,7 +63,7 @@ export const TransactionModal = (props: IProps) => {
     <Modal disableBackdropClick onClose={onClose} open={visible}>
       <div className={clsx(classes.root, props.className)}>
         <Typography className={classes.title}>{title}</Typography>
-        {txId && <CircularProgress color="primary" size={40} />}
+        <CircularProgress color="primary" size={40} />
         {instruction && (
           <Typography className={classes.instruction}>{instruction}</Typography>
         )}

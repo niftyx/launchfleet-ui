@@ -101,6 +101,8 @@ class ERC20Service {
   ): Promise<boolean> => {
     const balance: BigNumber = await this.contract.balanceOf(owner);
 
+    console.log(balance);
+
     return balance.gte(amount);
   };
 

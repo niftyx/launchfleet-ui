@@ -81,7 +81,7 @@ export const SwapRulesForm = (props: IProps) => {
   });
   const token = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    basePool.token
+    basePool.mainCoin
   );
 
   useEffect(() => {

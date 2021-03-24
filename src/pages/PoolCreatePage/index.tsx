@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { DEFAULT_NETWORK_ID } from "config/constants";
 import { getContractAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
+import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useState } from "react";
 import { ERC20Service } from "services/erc20";
@@ -17,6 +18,7 @@ import { ZERO_ADDRESS } from "utils/token";
 import {
   ConfirmSection,
   HeaderSection,
+  SuccessSection,
   SwapRulesForm,
   TokenInformationForm,
 } from "./components";
@@ -59,6 +61,7 @@ interface IProps {
 interface IState {
   step: ECreatePoolStep;
   basePool: IBasePool;
+  poolAddress: string;
 }
 
 const PoolCreatePage = (props: IProps) => {
@@ -74,7 +77,9 @@ const PoolCreatePage = (props: IProps) => {
   const [state, setState] = useState<IState>({
     step: ECreatePoolStep.TokenInformation,
     basePool,
+    poolAddress: "",
   });
+  const { enqueueSnackbar } = useSnackbar();
 
   const setStep = (step: ECreatePoolStep) => {
     setState((prev) => ({ ...prev, step }));
@@ -100,10 +105,25 @@ const PoolCreatePage = (props: IProps) => {
 
       setTxModalData(true, "Loading ...");
 
-      const hasEnoughAllowance = await erc20Service.hasEnoughBalanceToFund(
+      const hasEnoughFund = await erc20Service.hasEnoughBalanceToFund(
+        account || "",
+        basePool.startAmount
+      );
+
+      if (!hasEnoughFund) {
+        setTxModalData(false);
+        enqueueSnackbar("Insufficient fund to create a pool!", {
+          variant: "error",
+        });
+        return;
+      }
+
+      const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
+        account || "",
         poolContractAddress,
         basePool.startAmount
       );
+
       if (!hasEnoughAllowance) {
         setTxModalData(
           true,
@@ -126,6 +146,7 @@ const PoolCreatePage = (props: IProps) => {
         basePool.expectedRate,
         basePool.pozRate,
         basePool.startAmount,
+        basePool.mainCoin,
         ZERO_NUMBER,
         false,
         ZERO_NUMBER,
@@ -138,7 +159,21 @@ const PoolCreatePage = (props: IProps) => {
         txHash
       );
       await provider.waitForTransaction(txHash);
+
+      const poolAddress = await poolService.getCreatedPoolInfo(txHash);
+      setState((prev) => ({
+        ...prev,
+        poolAddress,
+        step: ECreatePoolStep.Success,
+      }));
+
+      setTxModalData(false);
+      enqueueSnackbar("You created a new pool successfully!");
     } catch (error) {
+      console.error(error);
+      enqueueSnackbar((error || {}).message || "Something went wrong!", {
+        variant: "error",
+      });
       setTxModalData(false);
     }
   };
@@ -149,7 +184,9 @@ const PoolCreatePage = (props: IProps) => {
         <div className={clsx(commonClasses.pageContent, classes.content)}>
           <Typography className={classes.title}>Create pool</Typography>
           <div className={classes.main}>
-            <HeaderSection setStep={setStep} step={state.step} />
+            {state.step !== ECreatePoolStep.Success && (
+              <HeaderSection setStep={setStep} step={state.step} />
+            )}
             {state.step === ECreatePoolStep.TokenInformation && (
               <TokenInformationForm
                 basePool={state.basePool}
@@ -179,6 +216,9 @@ const PoolCreatePage = (props: IProps) => {
                 basePool={state.basePool}
                 onConfirm={onCreatePool}
               />
+            )}
+            {state.step === ECreatePoolStep.Success && (
+              <SuccessSection poolAddress={state.poolAddress} />
             )}
           </div>
         </div>

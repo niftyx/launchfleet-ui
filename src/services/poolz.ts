@@ -249,7 +249,9 @@ class PoolzService {
     rate: BigNumber,
     pozRate: BigNumber,
     startAmount: BigNumber,
+    mainCoin: string,
     lockedUntil: BigNumber,
+
     is21Decimal: boolean,
     now: BigNumber,
     whitelistId: BigNumber
@@ -261,6 +263,7 @@ class PoolzService {
       pozRate,
       startAmount,
       lockedUntil,
+      mainCoin,
       is21Decimal,
       now,
       whitelistId
@@ -290,6 +293,26 @@ class PoolzService {
     const transactionObject = await this.contract.WithdrawLeftOvers(poolId);
     logger.log(`WithdrawLeftOvers transaction hash: ${transactionObject.hash}`);
     return this.provider.waitForTransaction(transactionObject.hash);
+  };
+
+  getCreatedPoolInfo = async (txHash: string): Promise<string> => {
+    const filter = this.contract.filters.NewPool();
+    if (!filter.topics || filter.topics.length === 0) return "";
+    const NewPoolEventId = filter.topics[0] as string;
+    const transactionReceipt: TransactionReceipt = await this.provider.getTransactionReceipt(
+      txHash
+    );
+
+    const fundCreateLog = transactionReceipt.logs.find((lg) =>
+      lg.topics.includes(NewPoolEventId)
+    );
+
+    if (fundCreateLog) {
+      const parsedLog = this.contract.interface.parseLog(fundCreateLog);
+      return parsedLog.args[0];
+    }
+
+    return "";
   };
 }
 

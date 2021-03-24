@@ -17,4 +17,5 @@ export enum ECreatePoolStep {
   TokenInformation = "Token information",
   SwapRules = "Swap rules",
   Confirm = "Confirm",
+  Success = "Success",
 }

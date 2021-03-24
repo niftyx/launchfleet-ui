@@ -3,8 +3,9 @@ import { ReactComponent as ArrowRightIcon } from "assets/svgs/arrow-right.svg";
 import clsx from "clsx";
 import { FormSelectField, FormTextField } from "components";
 import { DEFAULT_NETWORK_ID } from "config/constants";
-import { getToken, tokenIds } from "config/networks";
+import { getToken, networks, tokenIds } from "config/networks";
 import { useConnectedWeb3Context } from "contexts";
+import { ethers } from "ethers";
 import { Form, Formik } from "formik";
 import React from "react";
 import { ERC20Service } from "services/erc20";
@@ -99,8 +100,13 @@ export const TokenInformationForm = (props: IProps) => {
                     handleChange(e);
                     const tokenAddress = e.target.value;
                     if (isAddress(tokenAddress)) {
+                      const network = networks[DEFAULT_NETWORK_ID];
                       const erc20Service = new ERC20Service(
-                        provider,
+                        provider ||
+                          new ethers.providers.JsonRpcProvider(
+                            network.url,
+                            DEFAULT_NETWORK_ID
+                          ),
                         account,
                         tokenAddress
                       );
