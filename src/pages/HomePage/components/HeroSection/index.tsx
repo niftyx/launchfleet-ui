@@ -2,6 +2,7 @@ import { Button, Typography, makeStyles } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import clsx from "clsx";
 import React from "react";
+import { useHistory } from "react-router";
 import useCommonStyles from "styles/common";
 
 const useStyles = makeStyles((theme) => ({
@@ -86,6 +87,7 @@ interface IProps {
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
   const commonClasses = useCommonStyles();
+  const history = useHistory();
   return (
     <div className={clsx(classes.root, props.className)}>
       <div className={classes.content}>
@@ -102,6 +104,7 @@ export const HeroSection = (props: IProps) => {
             <Button
               className={classes.button}
               color="primary"
+              onClick={() => history.push("/pools")}
               variant="contained"
             >
               View all pools
@@ -109,10 +112,11 @@ export const HeroSection = (props: IProps) => {
             <Button
               className={classes.button}
               color="secondary"
+              onClick={() => history.push("/new-pool")}
               variant="contained"
             >
               <AddIcon className={classes.plus} />
-              <span>View all pools</span>
+              <span>Create pool</span>
             </Button>
           </div>
         </div>
