@@ -71,6 +71,10 @@ interface IState {
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
+  const finishTime = pool.finishTime.toNumber();
+  const startTime = pool.startTime.toNumber();
+  const nowTime = Math.floor(Date.now() / 1000);
+  const isLive = startTime <= nowTime && nowTime < finishTime;
 
   const [state, setState] = useState<IState>({
     amount: ZERO_NUMBER,
@@ -91,27 +95,29 @@ export const HeroSection = (props: IProps) => {
         <PoolItemDetails pool={pool} />
       </div>
       <div className={classes.right}>
-        <div className={classes.rightContent}>
-          <div className={classes.inputCommentWrapper}>
-            <Typography className={classes.inputComment}>
-              Your Bid Amount
+        {isLive && (
+          <div className={classes.rightContent}>
+            <div className={classes.inputCommentWrapper}>
+              <Typography className={classes.inputComment}>
+                Your Bid Amount
+              </Typography>
+              <PoolLiveFilledTag />
+            </div>
+            <TokenInput
+              amount={state.amount}
+              className={classes.input}
+              maxVisible
+              onChangeValue={onChangeAmount}
+              onMax={onMax}
+            />
+            <Button color="primary" fullWidth variant="contained">
+              Join the pool
+            </Button>
+            <Typography align="center" className={classes.time}>
+              1d : 16h : 47m : 51s
             </Typography>
-            <PoolLiveFilledTag />
           </div>
-          <TokenInput
-            amount={state.amount}
-            className={classes.input}
-            maxVisible
-            onChangeValue={onChangeAmount}
-            onMax={onMax}
-          />
-          <Button color="primary" fullWidth variant="contained">
-            Join the pool
-          </Button>
-          <Typography align="center" className={classes.time}>
-            1d : 16h : 47m : 51s
-          </Typography>
-        </div>
+        )}
       </div>
     </div>
   );

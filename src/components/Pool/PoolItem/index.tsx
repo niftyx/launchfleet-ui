@@ -1,11 +1,14 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import {
   Avatar,
   Button,
+  CircularProgress,
   Hidden,
   Typography,
   makeStyles,
 } from "@material-ui/core";
 import clsx from "clsx";
+import { SimpleLoader } from "components/Loader";
 import {
   PoolLiveFilledTag,
   PoolPriceTag,
@@ -14,6 +17,8 @@ import {
 } from "components/Tag";
 import { PoolJoinedStatusTag } from "components/Tag/PoolJoinedStatusTag";
 import { PublicTag } from "components/Tag/PublicTag";
+import { useConnectedWeb3Context } from "contexts";
+import { usePoolDetails } from "hooks";
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { IPool } from "types";
@@ -80,88 +85,124 @@ const useStyles = makeStyles((theme) => ({
     },
     "&.status": {
       minWidth: 170,
+      textAlign: "right",
     },
     "&.price": {
+      width: "17%",
       minWidth: 120,
+      textAlign: "right",
     },
     "&.tag": {
       minWidth: 80,
+      textAlign: "right",
     },
     "&.live": {
       flex: 1,
     },
   },
+  spinner: {
+    minHeight: "unset",
+    width: "100%",
+  },
 }));
 
 interface IProps {
   className?: string;
-  pool: IPool;
+  poolId: BigNumber;
 }
 
 export const PoolItem = (props: IProps) => {
   const classes = useStyles();
-  const { pool } = props;
-  const finishTime = pool.finishTime.toNumber();
-  const diff = finishTime - Math.floor(Date.now() / 1000);
-  const isClosed = diff < 0;
-  const isPrivate = pool.openForAll.eq(ZERO_NUMBER);
+  const { library: provider, networkId } = useConnectedWeb3Context();
+  const { poolId } = props;
+  const { loading: poolLoading, pool } = usePoolDetails(
+    poolId,
+    networkId,
+    provider
+  );
+
+  const finishTime = pool ? pool.finishTime.toNumber() : 0;
+  const startTime = pool ? pool.startTime.toNumber() : 0;
+  const nowTime = Math.floor(Date.now() / 1000);
+  const isClosed = nowTime - finishTime > 0;
+  const isLive = startTime <= nowTime && nowTime < finishTime;
+
+  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+
+  const renderContent = () => {
+    if (!pool) return null;
+
+    return (
+      <>
+        <Hidden mdUp>
+          <div className={classes.row}>
+            <Avatar className={classes.avatar} src={pool.img} />
+            <Typography className={classes.title}>{pool.tokenName}</Typography>
+            <PoolRaisedTag pool={pool} />
+          </div>
+          <div className={classes.row}>
+            {isPrivate ? <PrivateTag /> : <PublicTag />}
+            <PoolLiveFilledTag isLive={isLive} />
+          </div>
+          <div className={classes.row}>
+            <PoolPriceTag pool={pool} />
+            <PoolJoinedStatusTag pool={pool} />
+          </div>
+        </Hidden>
+        <Hidden smDown>
+          <Avatar className={classes.avatar} src={pool.img} />
+          <Typography className={classes.title}>{pool.tokenName}</Typography>
+          <div className={clsx(classes.itemWrapper, "live")}>
+            <PoolLiveFilledTag isLive={isLive} />
+          </div>
+          <div className={clsx(classes.itemWrapper, "tag")}>
+            {isPrivate ? <PrivateTag /> : <PublicTag />}
+          </div>
+          <div className={clsx(classes.itemWrapper, "price")}>
+            <PoolPriceTag pool={pool} />
+          </div>
+          <div className={clsx(classes.itemWrapper, "status")}>
+            <PoolJoinedStatusTag pool={pool} />
+          </div>
+
+          <div className={clsx(classes.itemWrapper, "raised")}>
+            <PoolRaisedTag pool={pool} />
+          </div>
+          <div className={clsx(classes.itemWrapper, "buttons")}>
+            {isLive && (
+              <Button
+                className={classes.joinButton}
+                color="primary"
+                variant="contained"
+              >
+                Join
+              </Button>
+            )}
+            {isClosed && (
+              <Button
+                className={classes.filledButton}
+                color="primary"
+                variant="contained"
+              >
+                Filled
+              </Button>
+            )}
+          </div>
+        </Hidden>
+      </>
+    );
+  };
 
   return (
     <NavLink
       className={clsx(classes.root, props.className, isClosed ? "" : "active")}
-      to={`/pool/${pool.token}`}
+      to={`/pool/${poolId.toHexString()}`}
     >
-      <Hidden mdUp>
-        <div className={classes.row}>
-          <Avatar className={classes.avatar} src={pool.img} />
-          <Typography className={classes.title}>{pool.tokenName}</Typography>
-          <PoolRaisedTag />
-        </div>
-        <div className={classes.row}>
-          {isPrivate ? <PrivateTag /> : <PublicTag />}
-          <PoolLiveFilledTag isLive />
-        </div>
-        <div className={classes.row}>
-          <PoolPriceTag pool={pool} />
-          <PoolJoinedStatusTag pool={pool} />
-        </div>
-      </Hidden>
-      <Hidden smDown>
-        <Avatar className={classes.avatar} src={pool.img} />
-        <Typography className={classes.title}>{pool.tokenName}</Typography>
-        <div className={clsx(classes.itemWrapper, "live")}>
-          <PoolLiveFilledTag isLive />
-        </div>
-        <div className={clsx(classes.itemWrapper, "tag")}>
-          {isPrivate ? <PrivateTag /> : <PublicTag />}
-        </div>
-        <div className={clsx(classes.itemWrapper, "price")}>
-          <PoolPriceTag pool={pool} />
-        </div>
-        <div className={clsx(classes.itemWrapper, "status")}>
-          <PoolJoinedStatusTag pool={pool} />
-        </div>
-
-        <div className={clsx(classes.itemWrapper, "raised")}>
-          <PoolRaisedTag />
-        </div>
-        <div className={clsx(classes.itemWrapper, "buttons")}>
-          {/* <Button
-            className={classes.joinButton}
-            color="primary"
-            variant="contained"
-          >
-            Join
-          </Button> */}
-          <Button
-            className={classes.filledButton}
-            color="primary"
-            variant="contained"
-          >
-            Filled
-          </Button>
-        </div>
-      </Hidden>
+      {poolLoading ? (
+        <SimpleLoader className={classes.spinner} />
+      ) : (
+        renderContent()
+      )}
     </NavLink>
   );
 };

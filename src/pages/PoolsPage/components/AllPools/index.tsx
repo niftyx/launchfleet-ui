@@ -1,8 +1,12 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { Button, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { PoolItem, SearchBar } from "components";
-import { MockPools } from "config/constants";
+import { PoolItem, SearchBar, SimpleLoader } from "components";
+import { PAGE_ITEMS } from "config/constants";
+import { useConnectedWeb3Context } from "contexts";
+import { usePoolsCount } from "hooks";
 import React, { useState } from "react";
+import { ONE_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -21,16 +25,49 @@ const useStyles = makeStyles((theme) => ({
 
 interface IState {
   keyword: string;
+  maxDisplayCount: BigNumber;
 }
 
 const AllPools = () => {
   const classes = useStyles();
-  const [state, setState] = useState<IState>({ keyword: "" });
+  const [state, setState] = useState<IState>({
+    keyword: "",
+    maxDisplayCount: PAGE_ITEMS,
+  });
+  const { library: provider, networkId } = useConnectedWeb3Context();
+  const { loading: poolsCountLoading, poolsCount } = usePoolsCount(
+    provider,
+    networkId
+  );
 
   const setKeyword = (keyword: string) =>
     setState((prev) => ({ ...prev, keyword }));
 
-  const onLoadMore = () => {};
+  const onLoadMore = () => {
+    const maxDisplayCount = state.maxDisplayCount.add(PAGE_ITEMS);
+    if (maxDisplayCount.lt(poolsCount)) {
+      setState((prev) => ({ ...prev, maxDisplayCount }));
+    } else {
+      setState((prev) => ({ ...prev, maxDisplayCount: poolsCount }));
+    }
+  };
+
+  const showMore =
+    poolsCount.eq(ZERO_NUMBER) || state.maxDisplayCount.lt(poolsCount);
+  const showLoading = poolsCountLoading && poolsCount.eq(ZERO_NUMBER);
+
+  const renderPools = () => {
+    const { maxDisplayCount } = state;
+    const poolIds: BigNumber[] = [];
+    for (
+      let index = ZERO_NUMBER;
+      index.lt(maxDisplayCount);
+      index = index.add(ONE_NUMBER)
+    ) {
+      poolIds.push(index);
+    }
+    return poolIds.map((id) => <PoolItem key={id.toHexString()} poolId={id} />);
+  };
 
   return (
     <div className={clsx(classes.root)}>
@@ -39,21 +76,18 @@ const AllPools = () => {
         value={state.keyword}
       />
       <div className={classes.content}>
-        {MockPools.map((pool) => (
-          <PoolItem
-            key={`${pool.token}-${pool.startTime.toHexString()}`}
-            pool={pool}
-          />
-        ))}
+        {showLoading ? <SimpleLoader /> : renderPools()}
       </div>
-      <Button
-        className={classes.loadMore}
-        fullWidth
-        onClick={onLoadMore}
-        variant="contained"
-      >
-        Load more pools
-      </Button>
+      {showMore && (
+        <Button
+          className={classes.loadMore}
+          fullWidth
+          onClick={onLoadMore}
+          variant="contained"
+        >
+          Load more pools
+        </Button>
+      )}
     </div>
   );
 };

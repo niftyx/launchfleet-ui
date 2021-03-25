@@ -19,3 +19,12 @@ export enum ECreatePoolStep {
   Confirm = "Confirm",
   Success = "Success",
 }
+
+export enum EPoolStatus {
+  Created = "Created",
+  Open = "Open",
+  PreMade = "PreMade",
+  OutOfstock = "OutOfstock",
+  Finished = "Finished",
+  Close = "Close",
+}

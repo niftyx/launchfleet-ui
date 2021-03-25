@@ -1,6 +1,12 @@
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
+import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { getTokenFromAddress } from "config/networks";
+import { useConnectedWeb3Context, useGlobal } from "contexts";
 import React from "react";
+import { IPool } from "types";
+import { formatBigNumber, formatToShortNumber } from "utils";
+import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -21,13 +27,37 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  isFilled?: boolean;
-  isUpcoming?: boolean;
+  pool: IPool;
 }
 
 export const PoolRaisedTag = (props: IProps) => {
   const classes = useStyles();
-  const { isFilled = false, isUpcoming = false } = props;
+  const { pool } = props;
+  const {
+    data: { price },
+  } = useGlobal();
+  const { networkId } = useConnectedWeb3Context();
+  const startTime = pool.startTime.toNumber();
+  const nowTime = Math.floor(Date.now() / 1000);
+  const isFilled = pool.leftTokens.eq(ZERO_NUMBER);
+  const isUpcoming = startTime > nowTime;
+
+  const token = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    pool.mainCoin
+  );
+  const tokenPrice = (price as any)[token.symbol.toLowerCase()].price;
+  const totalRaised = isUpcoming
+    ? pool.startAmount.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
+    : pool.startAmount
+        .sub(pool.leftTokens)
+        .mul(tokenPrice)
+        .div(pool.rate)
+        .div(ETH_NUMBER);
+
+  const totalRaisedStr = formatToShortNumber(
+    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  );
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -38,7 +68,7 @@ export const PoolRaisedTag = (props: IProps) => {
           isUpcoming ? "upcoming" : ""
         )}
       >
-        $350K
+        ${totalRaisedStr}
       </Typography>
       <Typography className={classes.raisedComment}>
         {isUpcoming ? "to be raised" : "raised"}

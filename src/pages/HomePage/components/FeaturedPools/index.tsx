@@ -1,9 +1,13 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { PoolItem } from "components";
-import { MockPools } from "config/constants";
+import { PoolItem, SimpleLoader } from "components";
+import { PAGE_ITEMS } from "config/constants";
+import { useConnectedWeb3Context } from "contexts";
+import { usePoolsCount } from "hooks";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { ONE_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -27,14 +31,29 @@ interface IProps {
 
 export const FeaturedPools = (props: IProps) => {
   const classes = useStyles();
+  const { library: provider, networkId } = useConnectedWeb3Context();
+  const { loading: poolsCountLoading, poolsCount } = usePoolsCount(
+    provider,
+    networkId
+  );
+
+  const renderPools = () => {
+    const maxDisplayCount = poolsCount.gt(PAGE_ITEMS) ? PAGE_ITEMS : poolsCount;
+    const poolIds: BigNumber[] = [];
+    for (
+      let index = ZERO_NUMBER;
+      index.lt(maxDisplayCount);
+      index = index.add(ONE_NUMBER)
+    ) {
+      poolIds.push(index);
+    }
+    return poolIds.map((id) => <PoolItem key={id.toHexString()} poolId={id} />);
+  };
+  const showLoading = poolsCountLoading && poolsCount.eq(ZERO_NUMBER);
+
   return (
     <div className={clsx(classes.root, props.className)}>
-      {MockPools.map((pool) => (
-        <PoolItem
-          key={`${pool.token}-${pool.startTime.toHexString()}`}
-          pool={pool}
-        />
-      ))}
+      {showLoading ? <SimpleLoader /> : renderPools()}
       <NavLink className={classes.pools} to="/pools">
         View all pools
       </NavLink>

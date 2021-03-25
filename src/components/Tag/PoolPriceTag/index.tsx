@@ -1,6 +1,8 @@
 import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { DEFAULT_DECIMALS } from "config/constants";
+import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { getTokenFromAddress } from "config/networks";
+import { useConnectedWeb3Context, useGlobal } from "contexts";
 import moment from "moment";
 import React from "react";
 import { IPool } from "types";
@@ -36,16 +38,29 @@ interface IProps {
 
 export const PoolPriceTag = (props: IProps) => {
   const classes = useStyles();
+  const { networkId } = useConnectedWeb3Context();
   const {
-    pool: { rate, tokenSymbol },
+    data: { price },
+  } = useGlobal();
+  const {
+    pool: { mainCoin, rate, tokenSymbol },
   } = props;
+
+  const mainToken = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    mainCoin
+  );
+  const mainTokenPrice = (price as any)[mainToken.symbol.toLowerCase()];
+  const tokenPrice = mainTokenPrice.price.div(rate);
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      <div className={classes.tag}>Price: $23.50</div>
+      <div className={classes.tag}>
+        Price: ${Number(formatBigNumber(tokenPrice, DEFAULT_DECIMALS, 6))}
+      </div>
       <div className={classes.label}>
-        1 AVAX = {formatToShortNumber(formatBigNumber(rate, DEFAULT_DECIMALS))}{" "}
-        {tokenSymbol}
+        1 {mainToken.symbol} ={" "}
+        {formatToShortNumber(formatBigNumber(rate, 0, 0))} {tokenSymbol}
       </div>
     </div>
   );

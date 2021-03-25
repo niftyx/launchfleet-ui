@@ -14,7 +14,7 @@ export const networkIds = {
   AVAXMAIN: 43114,
 } as const;
 
-export const networks: { [K in NetworkId]: INetwork } = {
+const networks: { [K in NetworkId]: INetwork } = {
   [networkIds.AVAXTEST]: {
     label: "AVAX TEST",
     url: "https://api.avax-test.network/ext/bc/C/rpc",

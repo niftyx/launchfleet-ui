@@ -13,6 +13,7 @@ const erc20Abi = [
   "function symbol() external view returns (string)",
   "function name() external view returns (string)",
   "function decimals() external view returns (uint8)",
+  "function totalSupply() external view returns (uint256)",
   "function transferFrom(address sender, address recipient, uint256 amount) public returns (bool)",
   "function transfer(address to, uint256 value) public returns (bool)",
 ];
@@ -152,6 +153,10 @@ class ERC20Service {
       name,
       image: "",
     };
+  };
+
+  getTotalSupply = async (): Promise<BigNumber> => {
+    return this.contract.totalSupply();
   };
 }
 

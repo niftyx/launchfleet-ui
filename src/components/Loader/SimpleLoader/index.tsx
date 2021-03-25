@@ -1,4 +1,5 @@
 import { CircularProgress, makeStyles } from "@material-ui/core";
+import clsx from "clsx";
 import React from "react";
 
 const useStyles = makeStyles((theme) => ({
@@ -7,15 +8,19 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     padding: theme.spacing(2),
-    minHeight: 100,
+    minHeight: 50,
   },
 }));
 
-export const SimpleLoader = () => {
+interface IProps {
+  className?: string;
+}
+
+export const SimpleLoader = (props: IProps) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
+    <div className={clsx(classes.root, props.className)}>
       <CircularProgress />
     </div>
   );

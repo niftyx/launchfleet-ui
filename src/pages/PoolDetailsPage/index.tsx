@@ -1,6 +1,7 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { SimpleLoader } from "components";
+import { NotFoundPanel, SimpleLoader } from "components";
 import { DEFAULT_NETWORK_ID } from "config/constants";
 import { useConnectedWeb3Context } from "contexts";
 import { usePoolDetails } from "hooks";
@@ -8,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import useCommonStyles from "styles/common";
 import { EPoolDetailsTab } from "utils/enums";
+import { MAX_NUMBER, isValidHexString } from "utils/number";
 
 import { HeroSection, PoolDetails, TabBar } from "./components";
 
@@ -34,9 +36,9 @@ const PoolDetailsPage = () => {
     tab: EPoolDetailsTab.PoolDetails,
   });
 
-  const poolId = ((params as any) || { id: "" }).id;
+  const poolId: string = ((params as any) || { id: "" }).id;
   const { loading: poolLoading, pool: poolData } = usePoolDetails(
-    poolId,
+    isValidHexString(poolId) ? BigNumber.from(poolId) : MAX_NUMBER,
     networkId || DEFAULT_NETWORK_ID,
     provider
   );
@@ -44,17 +46,15 @@ const PoolDetailsPage = () => {
   const setTab = (tab: EPoolDetailsTab) =>
     setState((prev) => ({ ...prev, tab }));
 
-  useEffect(() => {
-    if (!poolId) {
-      history.push("/pools");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolId]);
+  const isPoolValid = isValidHexString(poolId);
 
   const renderContent = () => {
     if (!poolId) return null;
-    if (!poolData || poolLoading) {
+    if (poolLoading) {
       return <SimpleLoader />;
+    }
+    if (!poolData) {
+      return <NotFoundPanel />;
     }
     return (
       <>
@@ -71,7 +71,7 @@ const PoolDetailsPage = () => {
     <div className={classes.root}>
       <div className={commonClasses.wrapper}>
         <div className={clsx(commonClasses.pageContent, classes.content)}>
-          {poolId && renderContent()}
+          {isPoolValid ? renderContent() : <NotFoundPanel />}
         </div>
       </div>
     </div>

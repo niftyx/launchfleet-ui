@@ -1,7 +1,6 @@
 import { Button, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { PoolItem, SearchBar } from "components";
-import { MockPools } from "config/constants";
 import React, { useState } from "react";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,12 +38,12 @@ const FeaturedPools = () => {
         value={state.keyword}
       />
       <div className={classes.content}>
-        {MockPools.map((pool) => (
+        {/* {MockPools.map((pool) => (
           <PoolItem
             key={`${pool.token}-${pool.startTime.toHexString()}`}
             pool={pool}
           />
-        ))}
+        ))} */}
       </div>
       <Button
         className={classes.loadMore}

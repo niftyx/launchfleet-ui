@@ -1,5 +1,6 @@
 import { knownTokens } from "config/networks";
 import { BigNumber } from "ethers";
+import { EPoolStatus } from "utils/enums";
 
 export interface ISettings {
   theme: THEME;
@@ -77,21 +78,34 @@ export interface IBasePool {
 }
 
 export interface IPool {
+  poolId: BigNumber;
+  // baseData
   token: string;
   creator: string;
   finishTime: BigNumber;
   rate: BigNumber;
   pozRate: BigNumber;
-  mainCoin: string;
   startAmount: BigNumber;
-  isLocked: boolean;
+  // moreData
+  lockedUntil: number;
   leftTokens: BigNumber;
   startTime: BigNumber;
   openForAll: BigNumber;
   unlockedTokens: BigNumber;
-  tookLeftOvers: boolean;
   is21DecimalRate: boolean;
+  // extraData
+  tookLeftOvers: boolean;
+  whiteListId: BigNumber;
+  mainCoin: string;
+  // status
+  poolStatus: EPoolStatus;
+
+  //
   img?: string;
+
+  //
   tokenName: string;
   tokenSymbol: string;
+  tokenDecimals: number;
+  tokenTotalSupply: BigNumber;
 }

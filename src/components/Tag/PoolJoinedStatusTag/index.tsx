@@ -1,3 +1,4 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { makeStyles } from "@material-ui/core";
 import { ReactComponent as UsersIcon } from "assets/svgs/users.svg";
 import clsx from "clsx";
@@ -46,7 +47,11 @@ interface IProps {
 export const PoolJoinedStatusTag = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
-  const percent = 60;
+  const percentNumber = pool.startAmount
+    .sub(pool.leftTokens)
+    .mul(BigNumber.from(100))
+    .div(pool.startAmount);
+  const percent = percentNumber.toNumber();
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -60,7 +65,7 @@ export const PoolJoinedStatusTag = (props: IProps) => {
           <div
             className={clsx(
               classes.progressBg,
-              (percent & 2) === 1 ? "filled" : ""
+              percent === 100 ? "filled" : ""
             )}
           ></div>
         </div>

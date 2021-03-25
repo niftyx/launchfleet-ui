@@ -1,13 +1,20 @@
 import { TransactionReceipt } from "@ethersproject/abstract-provider/lib/index";
-import { BigNumber, Contract, Wallet, ethers, utils } from "ethers";
-import { IToken, Maybe } from "types";
+import { BigNumber, Contract, Wallet, ethers } from "ethers";
+import { Maybe } from "types";
 import { getLogger } from "utils/logger";
-import { isAddress, isContract } from "utils/tools";
 
 const logger = getLogger("Services::Poolz");
 
 const poolzAbi = [
-  "function poolsCount() external view returns (uint8)",
+  // poolsCount
+  "function poolsCount() external view returns (uint256)",
+  // poolData
+  "function GetPoolBaseData(uint256) public view returns (address, address, uint256, uint256, uint256, uint256)",
+  "function GetPoolMoreData(uint256) public view returns (uint64, uint256, uint256, uint256, uint256, bool)",
+  "function GetPoolExtraData(uint256) public view returns (bool, uint256, address)",
+  // pool status
+  "function GetPoolStatus(uint256 _id) external view returns (uint8)",
+
   "function owner() external view returns (address)",
   "function MinETHInvest() external view returns (uint8)",
   "function IsERC20Maincoin() external view returns (bool)",
@@ -15,14 +22,13 @@ const poolzAbi = [
   "function MinDuration() external view returns (uint8)",
   "function isPoolLocked(uint) external view returns (bool)",
   "function getTotalInvestor() external view returns (uint8)",
-  "function GetPoolBaseData(uint256 _Id) public view returns (address,address,uint256,uint256,uint256,uint256)",
   "function GetInvestmentData(uint256 _id) external view returns (uint256,address,uint256,uint256,uint256)",
   "function IsTokenFilterOn() external view returns (bool)",
   "function paused() external view returns (bool)",
   "function PozFee() external view returns (uint256)",
   "function poolsMap(address, uint256) external view returns (uint256)",
   "function IsValidToken(address _address) public view returns (bool)",
-  "function GetPoolStatus(uint256 _id) external view returns (uint8)",
+
   "function IsPayble() external view returns(bool)",
   // write
   "function SetFee(uint256 _fee) public",
@@ -73,8 +79,44 @@ class PoolzService {
     return this.contract.address;
   }
 
-  getPoolsCount = async (): Promise<number> => {
+  /**
+   * get count of pools
+   * @returns BigNumber
+   */
+  getPoolsCount = async (): Promise<BigNumber> => {
     return this.contract.poolsCount();
+  };
+
+  /**
+   * poolId: BigNumber
+   * @returns token, creator, finishTime, rate, pozRate, startAmount
+   */
+  getPoolBaseData = async (id: BigNumber): Promise<any> => {
+    return this.contract.GetPoolBaseData(id);
+  };
+
+  /**
+   * poolId: BigNumber
+   * @returns lockedUntil, leftTokens, startTime, openForAll, unlockedTokens, Is21DecimalRate
+   */
+  getPoolMoreData = async (id: BigNumber): Promise<any> => {
+    return this.contract.GetPoolMoreData(id);
+  };
+
+  /**
+   * poolId: BigNumber
+   * @returns TookLeftOvers, WhiteListId, MainCoin
+   */
+  getPoolExtraData = async (id: BigNumber): Promise<any> => {
+    return this.contract.GetPoolExtraData(id);
+  };
+
+  /**
+   * get pool status
+   * @returns number
+   */
+  getPoolStatus = async (id: BigNumber): Promise<number> => {
+    return this.contract.GetPoolStatus(id);
   };
 
   getOwner = async (): Promise<string> => {
@@ -105,19 +147,6 @@ class PoolzService {
     return this.contract.getTotalInvestor();
   };
 
-  getPoolBaseData = async (
-    id: BigNumber
-  ): Promise<{
-    token1: string;
-    token2: string;
-    e1: BigNumber;
-    e2: BigNumber;
-    e3: BigNumber;
-    e4: BigNumber;
-  }> => {
-    return this.contract.GetPoolBaseData(id);
-  };
-
   getInvestmentData = async (
     id: BigNumber
   ): Promise<{
@@ -144,10 +173,6 @@ class PoolzService {
 
   isValidToken = async (address: string): Promise<boolean> => {
     return this.contract.IsValidToken(address);
-  };
-
-  getPoolStatus = async (id: BigNumber): Promise<number> => {
-    return this.contract.GetPoolStatus(id);
   };
 
   isPayble = async (): Promise<BigNumber> => {

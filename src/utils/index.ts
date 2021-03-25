@@ -53,7 +53,7 @@ export const formatToShortNumber = (number: string, decimals = 2): string => {
   let unitIndex = 0;
   let rNumber = parseFloat(number.split(",").join(""));
 
-  while (rNumber >= 1000 && unitIndex < 5) {
+  while (rNumber >= 1000 && unitIndex < 4) {
     unitIndex += 1;
     rNumber = rNumber / 1000;
   }

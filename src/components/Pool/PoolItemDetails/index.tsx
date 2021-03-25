@@ -1,13 +1,16 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { Avatar, Typography, makeStyles } from "@material-ui/core";
 import { ReactComponent as UsersIcon } from "assets/svgs/users.svg";
 import clsx from "clsx";
 import { PrivateTag } from "components/Tag";
 import { PublicTag } from "components/Tag/PublicTag";
-import { DEFAULT_DECIMALS } from "config/constants";
+import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { getTokenFromAddress } from "config/networks";
+import { useConnectedWeb3Context, useGlobal } from "contexts";
 import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, formatToShortNumber, shortenAddress } from "utils";
-import { ZERO_NUMBER } from "utils/number";
+import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     margin: "12px 0",
     height: 7,
     borderRadius: 3,
-    backgroundColor: theme.colors.ninth,
+    backgroundColor: theme.colors.sixth,
     position: "relative",
   },
   progress: {
@@ -88,10 +91,40 @@ interface IProps {
 export const PoolItemDetails = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
+  const {
+    data: { price },
+  } = useGlobal();
+  const { networkId } = useConnectedWeb3Context();
   const finishTime = pool.finishTime.toNumber();
-  const diff = finishTime - Math.floor(Date.now() / 1000);
-  const isPrivate = pool.openForAll.eq(ZERO_NUMBER);
-  const percent = 60;
+  const startTime = pool.startTime.toNumber();
+  const nowTime = Math.floor(Date.now() / 1000);
+  const isClosed = nowTime - finishTime > 0;
+  const isLive = startTime <= nowTime && nowTime < finishTime;
+  const mainToken = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    pool.mainCoin
+  );
+  const isUpcoming = startTime > nowTime;
+  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+
+  const percentNumber = pool.startAmount
+    .sub(pool.leftTokens)
+    .mul(BigNumber.from(100))
+    .div(pool.startAmount);
+  const percent = percentNumber.toNumber();
+
+  const tokenPrice = (price as any)[mainToken.symbol.toLowerCase()].price;
+  const totalRaised = isUpcoming
+    ? pool.startAmount.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
+    : pool.startAmount
+        .sub(pool.leftTokens)
+        .mul(tokenPrice)
+        .div(pool.rate)
+        .div(ETH_NUMBER);
+
+  const totalRaisedStr = formatToShortNumber(
+    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  );
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -106,14 +139,16 @@ export const PoolItemDetails = (props: IProps) => {
         <div>
           <Typography className={classes.comment}>Swap ratio</Typography>
           <Typography className={classes.value}>
-            1AVAX ={" "}
-            {formatToShortNumber(formatBigNumber(pool.rate, DEFAULT_DECIMALS))}{" "}
+            1{mainToken.symbol.toUpperCase()} ={" "}
+            {formatToShortNumber(formatBigNumber(pool.rate, 0))}{" "}
             {pool.tokenSymbol}
           </Typography>
         </div>
         <div>
-          <Typography className={classes.comment}>Raised</Typography>
-          <Typography className={classes.value}>$240K</Typography>
+          <Typography className={classes.comment}>
+            {isUpcoming ? "To raise" : "Raised"}
+          </Typography>
+          <Typography className={classes.value}>${totalRaisedStr}</Typography>
         </div>
       </div>
       <div className={classes.progressbar}>
@@ -124,7 +159,7 @@ export const PoolItemDetails = (props: IProps) => {
           <div
             className={clsx(
               classes.progressBg,
-              (percent & 2) === 1 ? "filled" : ""
+              percent === 100 ? "filled" : ""
             )}
           ></div>
         </div>

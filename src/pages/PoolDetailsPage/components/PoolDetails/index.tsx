@@ -1,7 +1,10 @@
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
+import moment from "moment";
 import React from "react";
 import { IPool } from "types";
+import { formatBigNumber, numberWithCommas } from "utils";
+import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,6 +72,13 @@ interface IProps {
 export const PoolDetails = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
+  const finishTime = pool.finishTime.toNumber();
+  const startTime = pool.startTime.toNumber();
+  const nowTime = Math.floor(Date.now() / 1000);
+  const isClosed = nowTime - finishTime > 0;
+  const isLive = startTime <= nowTime && nowTime < finishTime;
+  const isUpcoming = startTime > nowTime;
+  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -83,7 +93,7 @@ export const PoolDetails = (props: IProps) => {
                 Token Distribution
               </Typography>
               <Typography className={classes.sectionValue}>
-                February 4th 2021, 3:25 PM UTC
+                {moment(pool.startTime.toNumber() * 1000).toLocaleString()}
               </Typography>
             </div>
             <div className={classes.sectionRow}>
@@ -108,7 +118,9 @@ export const PoolDetails = (props: IProps) => {
               <Typography className={classes.sectionComment}>
                 Access Type
               </Typography>
-              <Typography className={classes.sectionValue}>Private</Typography>
+              <Typography className={classes.sectionValue}>
+                {isPrivate ? "Private" : "Public"}
+              </Typography>
             </div>
           </div>
         </div>
@@ -136,7 +148,9 @@ export const PoolDetails = (props: IProps) => {
                 Total Supply
               </Typography>
               <Typography className={classes.sectionValue}>
-                100,000,000
+                {numberWithCommas(
+                  formatBigNumber(pool.tokenTotalSupply, pool.tokenDecimals, 0)
+                )}
               </Typography>
             </div>
             <div className={classes.sectionRow}>
