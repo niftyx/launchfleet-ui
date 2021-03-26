@@ -62,6 +62,7 @@ interface IProps {
   InputLabelProps: InputLabelProps;
   FormHelperTextProps?: FormHelperTextProps;
   label?: string;
+  integerOnly?: boolean;
   helperText?: string | false | undefined;
   tokenSymbol: string;
   value: BigNumber;
@@ -72,6 +73,7 @@ export const FormRatioField = (props: IProps) => {
   const {
     className,
     helperText,
+    integerOnly = false,
     onChange: onChangeValue,
     tokenSymbol,
     value: amount,
@@ -93,7 +95,8 @@ export const FormRatioField = (props: IProps) => {
   const onChangeAmount = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
-    const { value: inputValue } = e.target;
+    const { value } = e.target;
+    const inputValue = integerOnly ? parseInt(value).toFixed(0) : value;
     if (!inputValue) {
       onChangeValue(ZERO_NUMBER);
     } else {

@@ -8,12 +8,10 @@ import {
 } from "config/constants";
 import { getToken, tokenIds } from "config/networks";
 import { useConnectedWeb3Context } from "contexts";
-import { ethers } from "ethers";
 import { Form, Formik } from "formik";
 import React from "react";
 import { ERC20Service } from "services/erc20";
 import { IBasePool, KnownToken } from "types";
-import { ZERO_ADDRESS } from "utils/token";
 import { isAddress } from "utils/tools";
 import * as Yup from "yup";
 
@@ -52,6 +50,12 @@ export const TokenInformationForm = (props: IProps) => {
     decimals: basePool.tokenDecimals,
     toToken: basePool.mainCoin,
   };
+  const basicTokenAddresses = Object.keys(tokenIds).map((id) =>
+    getToken(
+      networkId || DEFAULT_NETWORK_ID,
+      id as KnownToken
+    ).address.toLowerCase()
+  );
 
   return (
     <Formik
@@ -77,7 +81,6 @@ export const TokenInformationForm = (props: IProps) => {
         handleBlur,
         handleChange,
         handleSubmit,
-        isSubmitting,
         isValid,
         setFieldValue,
         touched,
@@ -100,8 +103,13 @@ export const TokenInformationForm = (props: IProps) => {
                   name: "token",
                   onBlur: handleBlur,
                   onChange: (e) => {
-                    handleChange(e);
                     const tokenAddress = e.target.value;
+                    if (
+                      basicTokenAddresses.includes(tokenAddress.toLowerCase())
+                    ) {
+                      return;
+                    }
+                    handleChange(e);
                     if (isAddress(tokenAddress)) {
                       const erc20Service = new ERC20Service(
                         provider || DEFAULT_READONLY_PROVIDER,
@@ -114,7 +122,7 @@ export const TokenInformationForm = (props: IProps) => {
                           setFieldValue("symbol", token?.symbol);
                           setFieldValue("decimals", token?.decimals);
                         })
-                        .catch((err) => {
+                        .catch(() => {
                           setFieldValue("symbol", "");
                           setFieldValue("decimals", 0);
                         });
@@ -231,7 +239,7 @@ export const TokenInformationForm = (props: IProps) => {
                 type="submit"
                 variant="contained"
               >
-                Set swipe ration&nbsp;&nbsp;
+                Set swipe rules&nbsp;&nbsp;
                 <ArrowRightIcon />
               </Button>
             </Grid>

@@ -23,7 +23,7 @@ export enum ECreatePoolStep {
 export enum EPoolStatus {
   Created = "Created",
   Open = "Open",
-  PreMade = "PreMade",
+  PreMade = "Upcoming",
   OutOfstock = "OutOfstock",
   Finished = "Finished",
   Close = "Close",

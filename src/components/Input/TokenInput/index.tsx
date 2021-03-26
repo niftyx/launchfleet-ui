@@ -1,4 +1,10 @@
-import { Input, InputAdornment, makeStyles } from "@material-ui/core";
+import {
+  FormHelperText,
+  FormHelperTextProps,
+  Input,
+  InputAdornment,
+  makeStyles,
+} from "@material-ui/core";
 import clsx from "clsx";
 import { DEFAULT_DECIMALS } from "config/constants";
 import { BigNumber, ethers } from "ethers";
@@ -53,10 +59,18 @@ interface IProps {
   maxVisible?: boolean;
   onMax: () => void;
   onChangeValue: (_: BigNumber) => void;
+  FormHelperTextProps?: FormHelperTextProps;
+  helperText?: string | false | undefined;
 }
 
 export const TokenInput = (props: IProps) => {
-  const { amount, maxVisible = false, onChangeValue, onMax } = props;
+  const {
+    amount,
+    helperText,
+    maxVisible = false,
+    onChangeValue,
+    onMax,
+  } = props;
   const classes = useStyles();
   const [currentValue, setCurrentValue] = useState("");
 
@@ -85,52 +99,34 @@ export const TokenInput = (props: IProps) => {
   };
 
   return (
-    <Input
-      className={clsx(classes.root, props.className)}
-      classes={{ focused: classes.inputFocused }}
-      disableUnderline
-      endAdornment={
-        maxVisible && (
-          <InputAdornment position="end">
-            <div className={classes.prefix}>
-              {maxVisible && (
-                <div className={classes.max} onClick={onMax}>
-                  MAX
-                </div>
-              )}
-            </div>
-          </InputAdornment>
-        )
-      }
-      onChange={onChangeAmount}
-      placeholder="0.00"
-      type="number"
-      value={currentValue}
-    />
+    <>
+      <Input
+        className={clsx(classes.root, props.className)}
+        classes={{ focused: classes.inputFocused }}
+        disableUnderline
+        endAdornment={
+          maxVisible && (
+            <InputAdornment position="end">
+              <div className={classes.prefix}>
+                {maxVisible && (
+                  <div className={classes.max} onClick={onMax}>
+                    MAX
+                  </div>
+                )}
+              </div>
+            </InputAdornment>
+          )
+        }
+        onChange={onChangeAmount}
+        placeholder="0.00"
+        type="number"
+        value={currentValue}
+      />
+      {helperText && (
+        <FormHelperText {...props.FormHelperTextProps}>
+          {helperText}
+        </FormHelperText>
+      )}
+    </>
   );
-
-  // return (
-  //   <TextField
-  //     InputProps={{
-  //       endAdornment: maxVisible && (
-  //         <InputAdornment position="end">
-  //           <div className={classes.prefix}>
-  //             {maxVisible && (
-  //               <div className={classes.max} onClick={onMax}>
-  //                 MAX
-  //               </div>
-  //             )}
-  //           </div>
-  //         </InputAdornment>
-  //       ),
-  //     }}
-  //     className={clsx(classes.root, props.className)}
-  //     fullWidth
-  //     onChange={onChangeAmount}
-  //     placeholder="0.00"
-  //     type="number"
-  //     value={currentValue}
-  //     variant="outlined"
-  //   />
-  // );
 };

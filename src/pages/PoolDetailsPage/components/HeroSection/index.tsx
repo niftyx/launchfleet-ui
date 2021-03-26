@@ -1,11 +1,21 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { Button, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { PoolItemDetails, PoolLiveFilledTag, TokenInput } from "components";
+import { PoolItemDetails, PoolStatusTag, Timer, TokenInput } from "components";
+import { DEFAULT_NETWORK_ID } from "config/constants";
+import { getContractAddress, getTokenFromAddress } from "config/networks";
+import { useConnectedWeb3Context, useGlobal } from "contexts";
+import moment from "moment";
+import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useEffect, useState } from "react";
+import { ERC20Service } from "services/erc20";
+import { PoolzService } from "services/poolz";
 import { IPool } from "types";
+import { formatBigNumber, waitSeconds } from "utils";
 import { ZERO_NUMBER } from "utils/number";
+import { getRemainingTimeStr } from "utils/pool";
+import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -13,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: transparentize(0.75, theme.colors.sixth),
     padding: 32,
     display: "flex",
+    justifyContent: "center",
     [theme.breakpoints.down(theme.custom.padWidth)]: {
       padding: "16px 24px",
       display: "block",
@@ -21,7 +32,13 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  left: { flex: 1 },
+  left: {
+    flex: 1,
+    maxWidth: "50%",
+    [theme.breakpoints.down(theme.custom.padWidth)]: {
+      maxWidth: "unset",
+    },
+  },
   right: {
     flex: 1,
     padding: "0 10%",
@@ -51,16 +68,17 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 32,
   },
   time: {
-    color: theme.colors.third,
     marginTop: 24,
-    fontSize: 12,
-    lineHeight: "16px",
+  },
+  joinDisabled: {
+    backgroundColor: `${theme.colors.seventh} !important`,
   },
 }));
 
 interface IProps {
   className?: string;
   pool: IPool;
+  poolId: BigNumber;
 }
 
 interface IState {
@@ -70,23 +88,151 @@ interface IState {
 
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
-  const { pool } = props;
+  const { pool, poolId } = props;
+  const {
+    data: {
+      globalPoolConfig: { MaxETHInvest },
+    },
+    setTxModalData,
+  } = useGlobal();
+  const {
+    account,
+    library: provider,
+    networkId,
+    onConnect,
+  } = useConnectedWeb3Context();
+  const { enqueueSnackbar } = useSnackbar();
+  console.log("======pool======", pool);
+
   const finishTime = pool.finishTime.toNumber();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
   const isLive = startTime <= nowTime && nowTime < finishTime;
+  const isMainCoinAvax = pool.mainCoin === ZERO_ADDRESS;
 
   const [state, setState] = useState<IState>({
     amount: ZERO_NUMBER,
     balance: ZERO_NUMBER,
   });
 
-  useEffect(() => {}, []);
+  const onFinished = () => {
+    console.log("===onfi");
+    setState((prev) => ({ ...prev, amount: ZERO_NUMBER }));
+  };
 
-  const onMax = () => {};
+  useEffect(() => {
+    let isMounted = true;
+    const loadBalance = async () => {
+      if (!provider) return;
+      try {
+        if (isMainCoinAvax) {
+          const balance = await provider.getBalance(account || "");
+          if (isMounted) setState((prev) => ({ ...prev, balance }));
+        } else {
+          const erc20Service = new ERC20Service(
+            provider,
+            account,
+            pool.mainCoin
+          );
+          const balance = await erc20Service.getBalanceOf(account || "");
+          if (isMounted) setState((prev) => ({ ...prev, balance }));
+        }
+      } catch (error) {
+        if (isMounted) setState((prev) => ({ ...prev, balance: ZERO_NUMBER }));
+      }
+    };
+    loadBalance();
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, networkId, provider]);
+
+  const onMax = () => {
+    const maxValue = isMainCoinAvax
+      ? MaxETHInvest.gt(state.balance)
+        ? state.balance
+        : MaxETHInvest
+      : state.balance;
+    setState((prev) => ({ ...prev, amount: maxValue }));
+  };
 
   const onChangeAmount = (amount: BigNumber) => {
-    setState((prev) => ({ ...prev, amount: prev.balance }));
+    setState((prev) => ({ ...prev, amount }));
+  };
+
+  const onJoin = async () => {
+    if (!provider) return;
+    const poolContractAddress = getContractAddress(
+      networkId || DEFAULT_NETWORK_ID,
+      "poolz"
+    );
+    const poolzService = new PoolzService(
+      provider,
+      account,
+      poolContractAddress
+    );
+    try {
+      if (isMainCoinAvax) {
+        setTxModalData(true, "Investing ...", "Follow wallet instructions");
+        const txHash = await poolzService.investETH(
+          poolId,
+          state.amount,
+          account || ""
+        );
+        setTxModalData(
+          true,
+          "Investing ...",
+          "Please wait until the transaction is confirmed!",
+          txHash
+        );
+        await provider.waitForTransaction(txHash);
+        setTxModalData(false);
+      } else {
+        const erc20Service = new ERC20Service(provider, account, pool.mainCoin);
+        setTxModalData(true, "Loading ...");
+
+        const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
+          account || "",
+          poolContractAddress,
+          state.amount
+        );
+
+        if (!hasEnoughAllowance) {
+          setTxModalData(
+            true,
+            "Approving tokens ...",
+            "Follow wallet instructions"
+          );
+          const txHash = await erc20Service.approveUnlimited(
+            poolContractAddress
+          );
+          setTxModalData(
+            true,
+            "Approving tokens ...",
+            "Please wait until the transaction is confirmed!",
+            txHash
+          );
+          await provider.waitForTransaction(txHash);
+        }
+        setTxModalData(true, "Investing ...", "Follow wallet instructions");
+        const txHash = await poolzService.investERC20(poolId, state.amount);
+        setTxModalData(
+          true,
+          "Investing ...",
+          "Please wait until the transaction is confirmed!",
+          txHash
+        );
+        await provider.waitForTransaction(txHash);
+        setTxModalData(false);
+      }
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar((error || { message: "Something went wrong" }).message, {
+        variant: "error",
+      });
+      setTxModalData(false);
+    }
   };
 
   return (
@@ -94,14 +240,15 @@ export const HeroSection = (props: IProps) => {
       <div className={classes.left}>
         <PoolItemDetails pool={pool} />
       </div>
-      <div className={classes.right}>
-        {isLive && (
+
+      {isLive && (
+        <div className={classes.right}>
           <div className={classes.rightContent}>
             <div className={classes.inputCommentWrapper}>
               <Typography className={classes.inputComment}>
                 Your Bid Amount
               </Typography>
-              <PoolLiveFilledTag />
+              <PoolStatusTag status={pool.poolStatus} />
             </div>
             <TokenInput
               amount={state.amount}
@@ -110,15 +257,28 @@ export const HeroSection = (props: IProps) => {
               onChangeValue={onChangeAmount}
               onMax={onMax}
             />
-            <Button color="primary" fullWidth variant="contained">
-              Join the pool
+            <Button
+              classes={{
+                disabled: classes.joinDisabled,
+              }}
+              color="primary"
+              disabled={
+                state.amount.eq(ZERO_NUMBER) || state.amount.gt(state.balance)
+              }
+              fullWidth
+              onClick={account ? onJoin : onConnect}
+              variant="contained"
+            >
+              {account ? "Join the pool" : "Connect wallet and join"}
             </Button>
-            <Typography align="center" className={classes.time}>
-              1d : 16h : 47m : 51s
-            </Typography>
+            <Timer
+              className={classes.time}
+              onFinished={onFinished}
+              toTimestamp={finishTime}
+            />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

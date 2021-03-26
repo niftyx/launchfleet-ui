@@ -92,12 +92,11 @@ export const UpcomingPoolItem = (props: IProps) => {
   );
 
   const finishTime = pool ? pool.finishTime.toNumber() : 0;
-  const startTime = pool ? pool.startTime.toNumber() : 0;
+
   const nowTime = Math.floor(Date.now() / 1000);
   const isClosed = nowTime - finishTime > 0;
-  const isLive = startTime <= nowTime && nowTime < finishTime;
 
-  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
 
   const renderContent = () => {
     if (!pool) return null;

@@ -1,10 +1,14 @@
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
+import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { getTokenFromAddress } from "config/networks";
+import { useConnectedWeb3Context, useGlobal } from "contexts";
 import moment from "moment";
 import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, numberWithCommas } from "utils";
 import { ZERO_NUMBER } from "utils/number";
+import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,13 +76,23 @@ interface IProps {
 export const PoolDetails = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
-  const finishTime = pool.finishTime.toNumber();
-  const startTime = pool.startTime.toNumber();
-  const nowTime = Math.floor(Date.now() / 1000);
-  const isClosed = nowTime - finishTime > 0;
-  const isLive = startTime <= nowTime && nowTime < finishTime;
-  const isUpcoming = startTime > nowTime;
-  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+  const {
+    data: {
+      globalPoolConfig: {
+        MaxERC20Invest,
+        MaxETHInvest,
+        MinERC20Invest,
+        MinETHInvest,
+      },
+    },
+  } = useGlobal();
+  const { networkId } = useConnectedWeb3Context();
+  const mainToken = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    pool.mainCoin
+  );
+  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
+  const isMainCoinAvax = pool.mainCoin === ZERO_ADDRESS;
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -100,19 +114,37 @@ export const PoolDetails = (props: IProps) => {
               <Typography className={classes.sectionComment}>
                 Min. allocation per wallet
               </Typography>
-              <Typography className={classes.sectionValue}>0 ETH</Typography>
+              <Typography className={classes.sectionValue}>
+                {formatBigNumber(
+                  isMainCoinAvax ? MinETHInvest : MinERC20Invest,
+                  0,
+                  0
+                )}{" "}
+                wei {mainToken.symbol.toUpperCase()}
+              </Typography>
             </div>
             <div className={classes.sectionRow}>
               <Typography className={classes.sectionComment}>
                 Max. allocation per wallet
               </Typography>
-              <Typography className={classes.sectionValue}>5 AVAX</Typography>
+              <Typography className={classes.sectionValue}>
+                {isMainCoinAvax ? (
+                  <>
+                    {formatBigNumber(MaxETHInvest, mainToken.decimals, 0)}{" "}
+                    {mainToken.symbol.toUpperCase()}
+                  </>
+                ) : (
+                  "Unlimited"
+                )}
+              </Typography>
             </div>
             <div className={classes.sectionRow}>
               <Typography className={classes.sectionComment}>
                 Min Swap Level
               </Typography>
-              <Typography className={classes.sectionValue}>15 AVAX</Typography>
+              <Typography className={classes.sectionValue}>
+                15 {mainToken.symbol.toUpperCase()}
+              </Typography>
             </div>
             <div className={classes.sectionRow}>
               <Typography className={classes.sectionComment}>

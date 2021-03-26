@@ -9,3 +9,4 @@ export * from "./Form";
 export * from "./Switch";
 export * from "./Modal";
 export * from "./Panel";
+export * from "./Timer";

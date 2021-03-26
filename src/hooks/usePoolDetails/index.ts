@@ -112,7 +112,7 @@ export const usePoolDetails = (
   useEffect(() => {
     loadPoolDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id.toHexString(), networkId, provider]);
+  }, [id.toHexString(), networkId]);
 
   return { ...state, load: loadPoolDetails };
 };

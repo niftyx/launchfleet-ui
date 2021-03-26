@@ -1,7 +1,7 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { DEFAULT_NETWORK_ID } from "config/constants";
 import { getContractAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
 import { useSnackbar } from "notistack";
@@ -11,9 +11,8 @@ import { ERC20Service } from "services/erc20";
 import { PoolzService } from "services/poolz";
 import useCommonStyles from "styles/common";
 import { IBasePool } from "types";
-import { formatBigNumber } from "utils";
 import { ECreatePoolStep } from "utils/enums";
-import { ZERO_NUMBER } from "utils/number";
+import { ETH_NUMBER, MAX_NUMBER, ZERO_NUMBER } from "utils/number";
 import { ZERO_ADDRESS } from "utils/token";
 
 import {
@@ -45,6 +44,7 @@ const basePool: IBasePool = {
   tokenDecimals: 0,
   tokenSymbol: "",
   auctionFinishTimestamp: ZERO_NUMBER,
+  auctionStartTimestamp: ZERO_NUMBER,
   expectedRate: ZERO_NUMBER,
   pozRate: ZERO_NUMBER,
   startAmount: ZERO_NUMBER,
@@ -62,7 +62,7 @@ interface IProps {
 interface IState {
   step: ECreatePoolStep;
   basePool: IBasePool;
-  poolAddress: string;
+  poolId: BigNumber;
 }
 
 const PoolCreatePage = (props: IProps) => {
@@ -78,7 +78,7 @@ const PoolCreatePage = (props: IProps) => {
   const [state, setState] = useState<IState>({
     step: ECreatePoolStep.TokenInformation,
     basePool,
-    poolAddress: "",
+    poolId: MAX_NUMBER,
   });
   const { enqueueSnackbar } = useSnackbar();
 
@@ -144,16 +144,14 @@ const PoolCreatePage = (props: IProps) => {
       const txHash = await poolService.createPool(
         basePool.token,
         basePool.auctionFinishTimestamp,
-        BigNumber.from(
-          formatBigNumber(basePool.expectedRate, DEFAULT_DECIMALS, 0)
-        ),
-        BigNumber.from(formatBigNumber(basePool.pozRate, DEFAULT_DECIMALS, 0)),
+        basePool.expectedRate.div(ETH_NUMBER),
+        basePool.pozRate.div(ETH_NUMBER),
         basePool.startAmount,
         basePool.mainCoin,
         ZERO_NUMBER,
         false,
-        ZERO_NUMBER,
-        ZERO_NUMBER
+        basePool.auctionStartTimestamp,
+        basePool.whitelistId
       );
       setTxModalData(
         true,
@@ -163,10 +161,10 @@ const PoolCreatePage = (props: IProps) => {
       );
       await provider.waitForTransaction(txHash);
 
-      const poolAddress = await poolService.getCreatedPoolInfo(txHash);
+      const poolId = await poolService.getCreatedPoolInfo(txHash);
       setState((prev) => ({
         ...prev,
-        poolAddress,
+        poolId,
         step: ECreatePoolStep.Success,
       }));
 
@@ -221,7 +219,7 @@ const PoolCreatePage = (props: IProps) => {
               />
             )}
             {state.step === ECreatePoolStep.Success && (
-              <SuccessSection poolAddress={state.poolAddress} />
+              <SuccessSection poolId={state.poolId} />
             )}
           </div>
         </div>

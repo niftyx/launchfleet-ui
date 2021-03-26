@@ -5,8 +5,8 @@ import { NotFoundPanel, SimpleLoader } from "components";
 import { DEFAULT_NETWORK_ID } from "config/constants";
 import { useConnectedWeb3Context } from "contexts";
 import { usePoolDetails } from "hooks";
-import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router";
+import React, { useState } from "react";
+import { useParams } from "react-router";
 import useCommonStyles from "styles/common";
 import { EPoolDetailsTab } from "utils/enums";
 import { MAX_NUMBER, isValidHexString } from "utils/number";
@@ -28,10 +28,8 @@ interface IState {
 const PoolDetailsPage = () => {
   const classes = useStyles();
   const commonClasses = useCommonStyles();
-  const { account, library: provider, networkId } = useConnectedWeb3Context();
-  const isConnected = !!account;
+  const { library: provider, networkId } = useConnectedWeb3Context();
   const params = useParams();
-  const history = useHistory();
   const [state, setState] = useState<IState>({
     tab: EPoolDetailsTab.PoolDetails,
   });
@@ -58,7 +56,7 @@ const PoolDetailsPage = () => {
     }
     return (
       <>
-        <HeroSection pool={poolData} />
+        <HeroSection pool={poolData} poolId={BigNumber.from(poolId)} />
         <TabBar className={classes.tabs} onChangeTab={setTab} tab={state.tab} />
         {state.tab === EPoolDetailsTab.PoolDetails && (
           <PoolDetails pool={poolData} />

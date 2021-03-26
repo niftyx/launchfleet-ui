@@ -4,9 +4,7 @@ import { ReactComponent as MediumIcon } from "assets/svgs/medium.svg";
 import { ReactComponent as TelegramIcon } from "assets/svgs/telegram.svg";
 import { ReactComponent as TwitterIcon } from "assets/svgs/twitter.svg";
 import { ethers } from "ethers";
-import { IPool, NetworkId } from "types";
-import { ZERO_NUMBER } from "utils/number";
-import { ZERO_ADDRESS } from "utils/token";
+import { NetworkId } from "types";
 
 export const STORAGE_KEY_SETTINGS = "settings";
 export const STORAGE_KEY_CONNECTOR = "CONNECTOR";
@@ -19,6 +17,7 @@ export const DEFAULT_NETWORK_ID: NetworkId = TEST_MODE ? 43113 : 43114;
 export const PRICE_DECIMALS = 18;
 export const DEFAULT_DECIMALS = 18;
 export const DEFAULT_USD = 0;
+export const DEFAULT_INTERVAL = 15;
 
 export const PAGE_ITEMS = BigNumber.from(5);
 

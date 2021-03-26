@@ -1,17 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
 import { TransactionModal } from "components";
-import { DEFAULT_USD, PRICE_DECIMALS } from "config/constants";
-import { getToken, knownTokens } from "config/networks";
+import {
+  DEFAULT_INTERVAL,
+  DEFAULT_NETWORK_ID,
+  DEFAULT_USD,
+  PRICE_DECIMALS,
+} from "config/constants";
+import { getContractAddress, getToken, knownTokens } from "config/networks";
 import { useConnectedWeb3Context } from "contexts/connectedWeb3";
 import { BigNumber, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { useIsMountedRef } from "hooks";
 import _ from "lodash";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { PoolzService } from "services/poolz";
 import { IGlobalData, KnownToken } from "types";
 import { getLogger } from "utils/logger";
-import { ZERO_NUMBER } from "utils/number";
+import { MAX_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const logger = getLogger("GlobalContext::");
 
@@ -41,6 +47,12 @@ const defaultData: IGlobalData = {
     title: "",
     instruction: "",
     txId: "",
+  },
+  globalPoolConfig: {
+    MinETHInvest: ZERO_NUMBER,
+    MaxETHInvest: ZERO_NUMBER,
+    MinERC20Invest: BigNumber.from("10000"),
+    MaxERC20Invest: MAX_NUMBER,
   },
 };
 
@@ -76,7 +88,7 @@ interface IProps {
 export const GlobalProvider = ({ children }: IProps) => {
   const [currentData, setCurrentData] = useState<IGlobalData>(defaultData);
   const isRefMounted = useIsMountedRef();
-  const { account, library: provider } = useConnectedWeb3Context();
+  const { account, library: provider, networkId } = useConnectedWeb3Context();
 
   const fetchPrices = async (): Promise<void> => {
     try {
@@ -137,11 +149,42 @@ export const GlobalProvider = ({ children }: IProps) => {
     }
   };
 
+  const loadGlobalPoolConfig = async (): Promise<void> => {
+    const poolzAddress = getContractAddress(
+      networkId || DEFAULT_NETWORK_ID,
+      "poolz"
+    );
+    const poolzService = new PoolzService(provider, account, poolzAddress);
+    try {
+      const [MinETHInvest, MaxETHInvest] = await Promise.all([
+        poolzService.getMinEthInvest(),
+        poolzService.getMaxETHInvest(),
+      ]);
+      if (isRefMounted.current === true) {
+        setCurrentData((prev) => ({
+          ...prev,
+          globalPoolConfig: {
+            ...defaultData.globalPoolConfig,
+            MinETHInvest,
+            MaxETHInvest,
+          },
+        }));
+      }
+    } catch (error) {
+      if (isRefMounted.current === true) {
+        setCurrentData((prev) => ({
+          ...prev,
+          globalPoolConfig: defaultData.globalPoolConfig,
+        }));
+      }
+    }
+  };
+
   useEffect(() => {
     fetchPrices();
     const interval = setInterval(() => {
       fetchPrices();
-    }, 100000);
+    }, DEFAULT_INTERVAL * 1000);
 
     return () => {
       clearInterval(interval);
@@ -151,12 +194,21 @@ export const GlobalProvider = ({ children }: IProps) => {
 
   useEffect(() => {
     fetchEthBalance();
-    const interval = setInterval(fetchEthBalance, 10000);
+    const interval = setInterval(fetchEthBalance, DEFAULT_INTERVAL * 1000);
     return () => {
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, provider]);
+
+  useEffect(() => {
+    loadGlobalPoolConfig();
+    const interval = setInterval(loadGlobalPoolConfig, DEFAULT_INTERVAL * 1000);
+    return () => {
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [networkId, provider]);
 
   const handleUpdateData = (update = {}) => {
     const mergedData = _.merge({}, currentData, update);

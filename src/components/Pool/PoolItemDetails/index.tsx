@@ -95,17 +95,14 @@ export const PoolItemDetails = (props: IProps) => {
     data: { price },
   } = useGlobal();
   const { networkId } = useConnectedWeb3Context();
-  const finishTime = pool.finishTime.toNumber();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
-  const isClosed = nowTime - finishTime > 0;
-  const isLive = startTime <= nowTime && nowTime < finishTime;
   const mainToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
     pool.mainCoin
   );
   const isUpcoming = startTime > nowTime;
-  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
 
   const percentNumber = pool.startAmount
     .sub(pool.leftTokens)

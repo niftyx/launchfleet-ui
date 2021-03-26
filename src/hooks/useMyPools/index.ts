@@ -8,17 +8,21 @@ import { getContractAddress } from "config/networks";
 import { useEffect, useState } from "react";
 import { PoolzService } from "services/poolz";
 import { waitSeconds } from "utils";
-import { ZERO_NUMBER } from "utils/number";
+import { ONE_NUMBER, ZERO_NUMBER } from "utils/number";
 
 interface IState {
-  poolsCount: BigNumber;
+  myPoolIds: BigNumber[];
   loading: boolean;
 }
 
-export const usePoolsCount = (provider: any, networkId?: number): IState => {
+export const useMyPools = (
+  provider: any,
+  account: string,
+  networkId?: number
+): IState => {
   const [state, setState] = useState<IState>({
     loading: false,
-    poolsCount: ZERO_NUMBER,
+    myPoolIds: [],
   });
 
   useEffect(() => {
@@ -32,20 +36,36 @@ export const usePoolsCount = (provider: any, networkId?: number): IState => {
       "",
       poolzAddress
     );
-    const loadPoolsCount = async () => {
+    const loadMyPoolIds = async () => {
       while (isMounted) {
         setState((prev) => ({ ...prev, loading: true }));
         try {
           const poolsCount = await poolzService.getPoolsCount();
+          const poolIds: BigNumber[] = [];
+          for (
+            let index = ZERO_NUMBER;
+            index.lt(poolsCount);
+            index = index.add(ONE_NUMBER)
+          ) {
+            poolIds.push(index);
+          }
+          const poolBaseInfos = await Promise.all(
+            poolIds.map((poolId) => poolzService.getPoolBaseData(poolId))
+          );
+          const myPoolIds = poolIds.filter(
+            (_, index) =>
+              poolBaseInfos[index][1].toLowerCase() === account.toLowerCase() // creator === account
+          );
           if (isMounted)
-            setState((prev) => ({ ...prev, loading: false, poolsCount }));
+            setState((prev) => ({ ...prev, loading: false, myPoolIds }));
         } catch (error) {
+          console.error(error);
           if (isMounted) setState((prev) => ({ ...prev, loading: false }));
         }
         await waitSeconds(DEFAULT_INTERVAL);
       }
     };
-    loadPoolsCount();
+    loadMyPoolIds();
 
     return () => {
       isMounted = false;

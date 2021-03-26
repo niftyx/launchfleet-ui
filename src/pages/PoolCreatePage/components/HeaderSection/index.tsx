@@ -84,7 +84,7 @@ export const HeaderSection = (props: IProps) => {
   const { setStep, step } = props;
   const stepValues = Object.values(ECreatePoolStep);
   const stepIndex = stepValues.indexOf(step);
-  const percent = (100 * (stepIndex + 1)) / stepValues.length;
+  const percent = (100 * (stepIndex + 1)) / (stepValues.length - 1);
 
   return (
     <div className={clsx(classes.root, props.className)}>

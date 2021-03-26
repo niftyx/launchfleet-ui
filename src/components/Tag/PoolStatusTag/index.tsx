@@ -2,6 +2,7 @@ import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import moment from "moment";
 import React from "react";
+import { EPoolStatus } from "utils/enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,17 +28,17 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  isLive?: boolean; // true: live, false: filled
+  status: EPoolStatus;
 }
 
-export const PoolLiveFilledTag = (props: IProps) => {
+export const PoolStatusTag = (props: IProps) => {
   const classes = useStyles();
-  const { isLive = false } = props;
+  const { status } = props;
 
   return (
     <div className={clsx(classes.root, props.className)}>
       <span className={clsx(classes.tag)}></span>
-      <span className={classes.label}>{isLive ? "Live" : "Filled"}</span>
+      <span className={classes.label}>{status}</span>
     </div>
   );
 };

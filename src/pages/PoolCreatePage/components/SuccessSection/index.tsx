@@ -1,3 +1,4 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import React from "react";
@@ -41,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  poolAddress: string;
+  poolId: BigNumber;
 }
 
 export const SuccessSection = (props: IProps) => {
@@ -55,7 +56,10 @@ export const SuccessSection = (props: IProps) => {
       <Typography align="center" className={classes.description}>
         We are going to review your pool and will list it in no time.
       </Typography>
-      <NavLink className={classes.link} to={`/pool/${props.poolAddress}`}>
+      <NavLink
+        className={classes.link}
+        to={`/pool/${props.poolId.toHexString()}`}
+      >
         Go to pool
       </NavLink>
     </div>

@@ -1,5 +1,6 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import {
+  DEFAULT_INTERVAL,
   DEFAULT_NETWORK_ID,
   DEFAULT_READONLY_PROVIDER,
 } from "config/constants";
@@ -48,7 +49,7 @@ export const useUpcomingPools = (provider: any, networkId?: number): IState => {
             poolIds.map((poolId) => poolzService.getPoolStatus(poolId))
           );
           const upcomingPoolIds = poolIds.filter(
-            (_, index) => poolStatuses[index] === 0 // created
+            (_, index) => poolStatuses[index] === 2 // Premade: now < startTime
           );
           if (isMounted)
             setState((prev) => ({ ...prev, loading: false, upcomingPoolIds }));
@@ -56,7 +57,7 @@ export const useUpcomingPools = (provider: any, networkId?: number): IState => {
           console.error(error);
           if (isMounted) setState((prev) => ({ ...prev, loading: false }));
         }
-        await waitSeconds(10);
+        await waitSeconds(DEFAULT_INTERVAL);
       }
     };
     loadUpcomingPoolIds();

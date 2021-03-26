@@ -2,7 +2,6 @@ import { BigNumber } from "@ethersproject/bignumber";
 import {
   Avatar,
   Button,
-  CircularProgress,
   Hidden,
   Typography,
   makeStyles,
@@ -10,9 +9,9 @@ import {
 import clsx from "clsx";
 import { SimpleLoader } from "components/Loader";
 import {
-  PoolLiveFilledTag,
   PoolPriceTag,
   PoolRaisedTag,
+  PoolStatusTag,
   PrivateTag,
 } from "components/Tag";
 import { PoolJoinedStatusTag } from "components/Tag/PoolJoinedStatusTag";
@@ -21,7 +20,6 @@ import { useConnectedWeb3Context } from "contexts";
 import { usePoolDetails } from "hooks";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { IPool } from "types";
 import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
@@ -75,10 +73,6 @@ const useStyles = makeStyles((theme) => ({
   },
   itemWrapper: {
     marginLeft: 24,
-    "&.buttons": {
-      minWidth: 80,
-      textAlign: "right",
-    },
     "&.raised": {
       minWidth: 80,
       textAlign: "right",
@@ -127,7 +121,7 @@ export const PoolItem = (props: IProps) => {
   const isClosed = nowTime - finishTime > 0;
   const isLive = startTime <= nowTime && nowTime < finishTime;
 
-  const isPrivate = pool ? pool.openForAll.eq(ZERO_NUMBER) : false;
+  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
 
   const renderContent = () => {
     if (!pool) return null;
@@ -142,7 +136,7 @@ export const PoolItem = (props: IProps) => {
           </div>
           <div className={classes.row}>
             {isPrivate ? <PrivateTag /> : <PublicTag />}
-            <PoolLiveFilledTag isLive={isLive} />
+            <PoolStatusTag status={pool.poolStatus} />
           </div>
           <div className={classes.row}>
             <PoolPriceTag pool={pool} />
@@ -153,7 +147,7 @@ export const PoolItem = (props: IProps) => {
           <Avatar className={classes.avatar} src={pool.img} />
           <Typography className={classes.title}>{pool.tokenName}</Typography>
           <div className={clsx(classes.itemWrapper, "live")}>
-            <PoolLiveFilledTag isLive={isLive} />
+            <PoolStatusTag status={pool.poolStatus} />
           </div>
           <div className={clsx(classes.itemWrapper, "tag")}>
             {isPrivate ? <PrivateTag /> : <PublicTag />}
@@ -167,26 +161,6 @@ export const PoolItem = (props: IProps) => {
 
           <div className={clsx(classes.itemWrapper, "raised")}>
             <PoolRaisedTag pool={pool} />
-          </div>
-          <div className={clsx(classes.itemWrapper, "buttons")}>
-            {isLive && (
-              <Button
-                className={classes.joinButton}
-                color="primary"
-                variant="contained"
-              >
-                Join
-              </Button>
-            )}
-            {isClosed && (
-              <Button
-                className={classes.filledButton}
-                color="primary"
-                variant="contained"
-              >
-                Filled
-              </Button>
-            )}
           </div>
         </Hidden>
       </>

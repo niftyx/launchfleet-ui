@@ -59,6 +59,12 @@ export interface IGlobalData {
     instruction: string;
     txId: string;
   };
+  globalPoolConfig: {
+    MinETHInvest: BigNumber;
+    MaxETHInvest: BigNumber;
+    MinERC20Invest: BigNumber;
+    MaxERC20Invest: BigNumber;
+  };
 }
 
 export interface IBasePool {
@@ -67,6 +73,7 @@ export interface IBasePool {
   tokenDecimals: number;
   tokenName: string;
   auctionFinishTimestamp: BigNumber; //Until what time the pool will work
+  auctionStartTimestamp: BigNumber;
   expectedRate: BigNumber; //the rate of the trade
   pozRate: BigNumber; //the rate for POZ Holders, how much each token = main coin
   startAmount: BigNumber; //Total amount of the tokens to sell in the pool

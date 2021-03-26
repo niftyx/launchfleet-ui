@@ -2,6 +2,7 @@ import { TransactionReceipt } from "@ethersproject/abstract-provider/lib/index";
 import { BigNumber, Contract, Wallet, ethers } from "ethers";
 import { Maybe } from "types";
 import { getLogger } from "utils/logger";
+import { MAX_NUMBER } from "utils/number";
 
 const logger = getLogger("Services::Poolz");
 
@@ -16,7 +17,8 @@ const poolzAbi = [
   "function GetPoolStatus(uint256 _id) external view returns (uint8)",
 
   "function owner() external view returns (address)",
-  "function MinETHInvest() external view returns (uint8)",
+  "function MinETHInvest() external view returns (uint256)",
+  "function MaxETHInvest() external view returns (uint256)",
   "function IsERC20Maincoin() external view returns (bool)",
   "function MaxDuration() external view returns (uint8)",
   "function MinDuration() external view returns (uint8)",
@@ -43,7 +45,7 @@ const poolzAbi = [
   "function SetPoolPrice(uint256 _PoolPrice) public",
   "function InvestERC20(uint256 _PoolId, uint256 _Amount) external",
   "function CreatePool( address _Token, uint256 _FinishTime, uint256 _Rate, uint256 _POZRate, uint256 _StartAmount, uint64 _LockedUntil, address _MainCoin, bool _Is21Decimal, uint256 _Now, uint256 _WhiteListId ) public payable",
-  "function InvestETH(uint256 _PoolId) external payable",
+  "function InvestETH(uint256) external",
   "function WithdrawERC20Fee(address _Token, address _to) public",
   "function WithdrawLeftOvers(uint256 _PoolId) public returns (bool)",
   // events
@@ -123,8 +125,12 @@ class PoolzService {
     return this.contract.owner();
   };
 
-  getMinEthInvest = async (): Promise<number> => {
+  getMinEthInvest = async (): Promise<BigNumber> => {
     return this.contract.MinETHInvest();
+  };
+
+  getMaxETHInvest = async (): Promise<BigNumber> => {
+    return this.contract.MaxETHInvest();
   };
 
   IsERC20Maincoin = async (): Promise<BigNumber> => {
@@ -259,15 +265,6 @@ class PoolzService {
     return this.provider.waitForTransaction(transactionObject.hash);
   };
 
-  investERC20 = async (
-    poolId: BigNumber,
-    amount: BigNumber
-  ): Promise<TransactionReceipt> => {
-    const transactionObject = await this.contract.InvestERC20(poolId, amount);
-    logger.log(`InvestERC20 transaction hash: ${transactionObject.hash}`);
-    return this.provider.waitForTransaction(transactionObject.hash);
-  };
-
   createPool = async (
     token: string,
     finishTime: BigNumber,
@@ -276,7 +273,6 @@ class PoolzService {
     startAmount: BigNumber,
     mainCoin: string,
     lockedUntil: BigNumber,
-
     is21Decimal: boolean,
     now: BigNumber,
     whitelistId: BigNumber
@@ -297,10 +293,28 @@ class PoolzService {
     return transactionObject.hash;
   };
 
-  investETH = async (poolId: BigNumber): Promise<TransactionReceipt> => {
-    const transactionObject = await this.contract.InvestETH(poolId);
-    logger.log(`InvestETH transaction hash: ${transactionObject.hash}`);
-    return this.provider.waitForTransaction(transactionObject.hash);
+  investETH = async (
+    poolId: BigNumber,
+    amount: BigNumber,
+    fromAddress: string
+  ): Promise<string> => {
+    const transactionObject = await this.contract.InvestETH(poolId, {
+      value: amount,
+      from: fromAddress,
+    });
+    logger.log(`InvestAVAX transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
+  };
+
+  investERC20 = async (
+    poolId: BigNumber,
+    amount: BigNumber
+  ): Promise<string> => {
+    const transactionObject = await this.contract.InvestERC20(poolId, amount, {
+      value: "0x0",
+    });
+    logger.log(`InvestAVAX transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
   };
 
   withdrawERC20Fee = async (
@@ -320,9 +334,9 @@ class PoolzService {
     return this.provider.waitForTransaction(transactionObject.hash);
   };
 
-  getCreatedPoolInfo = async (txHash: string): Promise<string> => {
+  getCreatedPoolInfo = async (txHash: string): Promise<BigNumber> => {
     const filter = this.contract.filters.NewPool();
-    if (!filter.topics || filter.topics.length === 0) return "";
+    if (!filter.topics || filter.topics.length === 0) return MAX_NUMBER;
     const NewPoolEventId = filter.topics[0] as string;
     const transactionReceipt: TransactionReceipt = await this.provider.getTransactionReceipt(
       txHash
@@ -334,10 +348,10 @@ class PoolzService {
 
     if (fundCreateLog) {
       const parsedLog = this.contract.interface.parseLog(fundCreateLog);
-      return parsedLog.args[0];
+      return parsedLog.args[1];
     }
 
-    return "";
+    return MAX_NUMBER;
   };
 }
 
