@@ -19,7 +19,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     label: "AVAX TEST",
     url: "https://api.avax-test.network/ext/bc/C/rpc",
     contracts: {
-      poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
+      poolz: "0x04D9bD40D5E978d0bd0Ac948D9dBDe5352405319",
     },
     etherscanUri: "https://cchain.explorer.avax-test.network/",
   },
@@ -27,7 +27,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     label: "AVAX Main",
     url: "https://api.avax.network/ext/bc/C/rpc",
     contracts: {
-      poolz: "0xAdE05F9df9C1079139C478E2749A1897Bdb6EF2d",
+      poolz: "0x04D9bD40D5E978d0bd0Ac948D9dBDe5352405319",
     },
     etherscanUri: "https://cchain.explorer.avax.network/",
   },

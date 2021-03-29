@@ -1,4 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
+import { parseEther } from "@ethersproject/units";
 import { ReactComponent as DiscordIcon } from "assets/svgs/discord.svg";
 import { ReactComponent as MediumIcon } from "assets/svgs/medium.svg";
 import { ReactComponent as TelegramIcon } from "assets/svgs/telegram.svg";
@@ -20,6 +21,7 @@ export const DEFAULT_USD = 0;
 export const DEFAULT_INTERVAL = 15;
 
 export const PAGE_ITEMS = BigNumber.from(5);
+export const MIN_CALC_TOKENS = parseEther("10");
 
 export const NETWORK_CONFIG = TEST_MODE
   ? {

@@ -26,7 +26,7 @@ export const UpcomingPools = (props: IProps) => {
   return (
     <div className={clsx(classes.root, props.className)}>
       <Grid container spacing={3}>
-        {upcomingPoolIdsLoading && (
+        {upcomingPoolIdsLoading && upcomingPoolIds.length === 0 && (
           <Grid item md={4} sm={6} xs={12}>
             <SimpleLoader />
           </Grid>

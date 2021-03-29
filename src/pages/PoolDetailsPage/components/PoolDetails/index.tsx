@@ -1,6 +1,6 @@
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { DEFAULT_NETWORK_ID } from "config/constants";
 import { getTokenFromAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
 import moment from "moment";
@@ -8,6 +8,7 @@ import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, numberWithCommas } from "utils";
 import { ZERO_NUMBER } from "utils/number";
+import { getMinMaxAllocationPerWallet } from "utils/pool";
 import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
@@ -77,22 +78,18 @@ export const PoolDetails = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
   const {
-    data: {
-      globalPoolConfig: {
-        MaxERC20Invest,
-        MaxETHInvest,
-        MinERC20Invest,
-        MinETHInvest,
-      },
-    },
+    data: { globalPoolConfig },
   } = useGlobal();
   const { networkId } = useConnectedWeb3Context();
   const mainToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
     pool.mainCoin
   );
-  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
-  const isMainCoinAvax = pool.mainCoin === ZERO_ADDRESS;
+  const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
+  const {
+    MaxAllocationPerWallet,
+    MinAllocationPerWallet,
+  } = getMinMaxAllocationPerWallet(pool, globalPoolConfig, isPrivate);
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -115,12 +112,8 @@ export const PoolDetails = (props: IProps) => {
                 Min. allocation per wallet
               </Typography>
               <Typography className={classes.sectionValue}>
-                {formatBigNumber(
-                  isMainCoinAvax ? MinETHInvest : MinERC20Invest,
-                  0,
-                  0
-                )}{" "}
-                wei {mainToken.symbol.toUpperCase()}
+                {formatBigNumber(MinAllocationPerWallet, 18)}{" "}
+                {mainToken.symbol.toUpperCase()}
               </Typography>
             </div>
             <div className={classes.sectionRow}>
@@ -128,14 +121,8 @@ export const PoolDetails = (props: IProps) => {
                 Max. allocation per wallet
               </Typography>
               <Typography className={classes.sectionValue}>
-                {isMainCoinAvax ? (
-                  <>
-                    {formatBigNumber(MaxETHInvest, mainToken.decimals, 0)}{" "}
-                    {mainToken.symbol.toUpperCase()}
-                  </>
-                ) : (
-                  "Unlimited"
-                )}
+                {formatBigNumber(MaxAllocationPerWallet, mainToken.decimals)}{" "}
+                {mainToken.symbol.toUpperCase()}
               </Typography>
             </div>
             <div className={classes.sectionRow}>

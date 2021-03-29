@@ -45,7 +45,7 @@ const poolzAbi = [
   "function SetPoolPrice(uint256 _PoolPrice) public",
   "function InvestERC20(uint256 _PoolId, uint256 _Amount) external",
   "function CreatePool( address _Token, uint256 _FinishTime, uint256 _Rate, uint256 _POZRate, uint256 _StartAmount, uint64 _LockedUntil, address _MainCoin, bool _Is21Decimal, uint256 _Now, uint256 _WhiteListId ) public payable",
-  "function InvestETH(uint256) external",
+  "function InvestETH(uint256) external payable",
   "function WithdrawERC20Fee(address _Token, address _to) public",
   "function WithdrawLeftOvers(uint256 _PoolId) public returns (bool)",
   // events

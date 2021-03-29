@@ -96,7 +96,8 @@ export const FormRatioField = (props: IProps) => {
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
     const { value } = e.target;
-    const inputValue = integerOnly ? parseInt(value).toFixed(0) : value;
+    const inputValue =
+      integerOnly && value ? parseInt(value).toFixed(0) : value;
     if (!inputValue) {
       onChangeValue(ZERO_NUMBER);
     } else {

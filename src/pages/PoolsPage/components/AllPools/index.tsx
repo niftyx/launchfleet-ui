@@ -61,7 +61,7 @@ const AllPools = () => {
     const poolIds: BigNumber[] = [];
     for (
       let index = ZERO_NUMBER;
-      index.lt(maxDisplayCount);
+      index.lt(maxDisplayCount) && index.lt(poolsCount);
       index = index.add(ONE_NUMBER)
     ) {
       poolIds.push(index);

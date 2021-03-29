@@ -35,7 +35,11 @@ const PoolDetailsPage = () => {
   });
 
   const poolId: string = ((params as any) || { id: "" }).id;
-  const { loading: poolLoading, pool: poolData } = usePoolDetails(
+  const {
+    load: reloadPoolInfo,
+    loading: poolLoading,
+    pool: poolData,
+  } = usePoolDetails(
     isValidHexString(poolId) ? BigNumber.from(poolId) : MAX_NUMBER,
     networkId || DEFAULT_NETWORK_ID,
     provider
@@ -48,7 +52,7 @@ const PoolDetailsPage = () => {
 
   const renderContent = () => {
     if (!poolId) return null;
-    if (poolLoading) {
+    if (poolLoading && !poolData) {
       return <SimpleLoader />;
     }
     if (!poolData) {
@@ -56,7 +60,11 @@ const PoolDetailsPage = () => {
     }
     return (
       <>
-        <HeroSection pool={poolData} poolId={BigNumber.from(poolId)} />
+        <HeroSection
+          pool={poolData}
+          poolId={BigNumber.from(poolId)}
+          reloadPoolInfo={reloadPoolInfo}
+        />
         <TabBar className={classes.tabs} onChangeTab={setTab} tab={state.tab} />
         {state.tab === EPoolDetailsTab.PoolDetails && (
           <PoolDetails pool={poolData} />

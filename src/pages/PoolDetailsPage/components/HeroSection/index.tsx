@@ -14,7 +14,7 @@ import { PoolzService } from "services/poolz";
 import { IPool } from "types";
 import { formatBigNumber, waitSeconds } from "utils";
 import { ZERO_NUMBER } from "utils/number";
-import { getRemainingTimeStr } from "utils/pool";
+import { getMinMaxAllocationPerWallet, getRemainingTimeStr } from "utils/pool";
 import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
@@ -79,6 +79,7 @@ interface IProps {
   className?: string;
   pool: IPool;
   poolId: BigNumber;
+  reloadPoolInfo: () => Promise<void>;
 }
 
 interface IState {
@@ -88,11 +89,9 @@ interface IState {
 
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
-  const { pool, poolId } = props;
+  const { pool, poolId, reloadPoolInfo } = props;
   const {
-    data: {
-      globalPoolConfig: { MaxETHInvest },
-    },
+    data: { globalPoolConfig },
     setTxModalData,
   } = useGlobal();
   const {
@@ -102,13 +101,18 @@ export const HeroSection = (props: IProps) => {
     onConnect,
   } = useConnectedWeb3Context();
   const { enqueueSnackbar } = useSnackbar();
-  console.log("======pool======", pool);
 
   const finishTime = pool.finishTime.toNumber();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
   const isLive = startTime <= nowTime && nowTime < finishTime;
   const isMainCoinAvax = pool.mainCoin === ZERO_ADDRESS;
+  const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
+
+  const {
+    MaxAllocationPerWallet,
+    MinAllocationPerWallet,
+  } = getMinMaxAllocationPerWallet(pool, globalPoolConfig, isPrivate);
 
   const [state, setState] = useState<IState>({
     amount: ZERO_NUMBER,
@@ -116,7 +120,6 @@ export const HeroSection = (props: IProps) => {
   });
 
   const onFinished = () => {
-    console.log("===onfi");
     setState((prev) => ({ ...prev, amount: ZERO_NUMBER }));
   };
 
@@ -150,9 +153,9 @@ export const HeroSection = (props: IProps) => {
 
   const onMax = () => {
     const maxValue = isMainCoinAvax
-      ? MaxETHInvest.gt(state.balance)
+      ? MaxAllocationPerWallet.gt(state.balance)
         ? state.balance
-        : MaxETHInvest
+        : MaxAllocationPerWallet
       : state.balance;
     setState((prev) => ({ ...prev, amount: maxValue }));
   };
@@ -187,6 +190,8 @@ export const HeroSection = (props: IProps) => {
           txHash
         );
         await provider.waitForTransaction(txHash);
+        setTxModalData(true, "Reloading ...");
+        await reloadPoolInfo();
         setTxModalData(false);
       } else {
         const erc20Service = new ERC20Service(provider, account, pool.mainCoin);
@@ -224,6 +229,8 @@ export const HeroSection = (props: IProps) => {
           txHash
         );
         await provider.waitForTransaction(txHash);
+        setTxModalData(true, "Reloading ...");
+        await reloadPoolInfo();
         setTxModalData(false);
       }
     } catch (error) {
