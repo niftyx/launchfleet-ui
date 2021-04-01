@@ -9,7 +9,6 @@ import { IPool } from "types";
 import { formatBigNumber, numberWithCommas } from "utils";
 import { ZERO_NUMBER } from "utils/number";
 import { getMinMaxAllocationPerWallet } from "utils/pool";
-import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
   root: {

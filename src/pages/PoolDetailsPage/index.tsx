@@ -11,7 +11,12 @@ import useCommonStyles from "styles/common";
 import { EPoolDetailsTab } from "utils/enums";
 import { MAX_NUMBER, isValidHexString } from "utils/number";
 
-import { HeroSection, PoolDetails, TabBar } from "./components";
+import {
+  HeroSection,
+  PoolDetails,
+  TabBar,
+  YourAllocations,
+} from "./components";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -68,6 +73,9 @@ const PoolDetailsPage = () => {
         <TabBar className={classes.tabs} onChangeTab={setTab} tab={state.tab} />
         {state.tab === EPoolDetailsTab.PoolDetails && (
           <PoolDetails pool={poolData} />
+        )}
+        {state.tab === EPoolDetailsTab.YourAllocations && (
+          <YourAllocations pool={poolData} />
         )}
       </>
     );

@@ -12,9 +12,11 @@ export const STORAGE_KEY_CONNECTOR = "CONNECTOR";
 export const LOGGER_ID = "snowstorm";
 
 export const TEST_MODE = Boolean(Number(process.env.REACT_APP_TEST || "1"));
+export const API_URL = String(process.env.REACT_APP_API_URL || "");
 
 export const DEFAULT_NETWORK_ID: NetworkId = TEST_MODE ? 43113 : 43114;
 
+export const API_RPS = 10;
 export const PRICE_DECIMALS = 18;
 export const DEFAULT_DECIMALS = 18;
 export const DEFAULT_USD = 0;

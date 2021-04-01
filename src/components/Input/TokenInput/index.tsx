@@ -61,11 +61,13 @@ interface IProps {
   onChangeValue: (_: BigNumber) => void;
   FormHelperTextProps?: FormHelperTextProps;
   helperText?: string | false | undefined;
+  error?: boolean;
 }
 
 export const TokenInput = (props: IProps) => {
   const {
     amount,
+    error = false,
     helperText,
     maxVisible = false,
     onChangeValue,
@@ -117,6 +119,7 @@ export const TokenInput = (props: IProps) => {
             </InputAdornment>
           )
         }
+        error={error}
         onChange={onChangeAmount}
         placeholder="0.00"
         type="number"

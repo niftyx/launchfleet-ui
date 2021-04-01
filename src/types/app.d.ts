@@ -115,4 +115,33 @@ export interface IPool {
   tokenSymbol: string;
   tokenDecimals: number;
   tokenTotalSupply: BigNumber;
+  //
+  totalMembers: BigNumber;
+}
+
+export interface IPoolHistory {
+  id: string;
+  txHash: string;
+  status: EPoolStatus;
+  timestamp: number;
+  pool?: IPool;
+}
+
+export interface IInvestor {
+  id: string;
+  address: string;
+  createTimeStamp: number;
+  updateTimeStamp: number;
+  history?: IInvestHistory[];
+  pools?: IPool[];
+}
+
+export interface IInvestHistory {
+  id: string;
+  txHash: string;
+  amount: BigNumber;
+  timestamp: number;
+  investorId: BigNumber;
+  investor?: IInvestor;
+  pool?: IPool;
 }

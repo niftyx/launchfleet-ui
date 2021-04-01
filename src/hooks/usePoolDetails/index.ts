@@ -7,6 +7,7 @@ import {
 import { getContractAddress } from "config/networks";
 import { useIsMountedRef } from "hooks/useIsMountedRef";
 import { useEffect, useState } from "react";
+import { getApiService } from "services/api";
 import { ERC20Service } from "services/erc20";
 import { PoolzService } from "services/poolz";
 import { IPool } from "types";
@@ -31,6 +32,7 @@ export const usePoolDetails = (
   });
 
   const isMountedRef = useIsMountedRef();
+  const apiService = getApiService();
 
   const loadPoolDetails = async () => {
     if (id.eq(MAX_NUMBER)) {
@@ -71,6 +73,8 @@ export const usePoolDetails = (
       const erc20Info = await erc20Service.getProfileSummary();
       const totalSupply = await erc20Service.getTotalSupply();
 
+      const totalMembers = await apiService.getTotalMembersOfPool(id);
+
       const pool: IPool = {
         poolId: id,
         // baseData
@@ -98,6 +102,7 @@ export const usePoolDetails = (
         tokenSymbol: erc20Info?.symbol || "",
         tokenDecimals: erc20Info?.decimals || DEFAULT_DECIMALS,
         tokenTotalSupply: totalSupply,
+        totalMembers,
       };
 
       if (isMountedRef.current === true) {

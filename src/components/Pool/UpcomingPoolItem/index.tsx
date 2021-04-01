@@ -9,7 +9,6 @@ import { usePoolDetails } from "hooks";
 import { transparentize } from "polished";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { IPool } from "types";
 import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
@@ -92,9 +91,11 @@ export const UpcomingPoolItem = (props: IProps) => {
   );
 
   const finishTime = pool ? pool.finishTime.toNumber() : 0;
+  const startTime = pool ? pool.startTime.toNumber() : 0;
 
   const nowTime = Math.floor(Date.now() / 1000);
   const isClosed = nowTime - finishTime > 0;
+  const isActive = nowTime < finishTime && nowTime >= startTime;
 
   const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
 
@@ -140,7 +141,7 @@ export const UpcomingPoolItem = (props: IProps) => {
 
   return (
     <NavLink
-      className={clsx(classes.root, props.className, isClosed ? "" : "active")}
+      className={clsx(classes.root, props.className, isActive ? "active" : "")}
       to={`/pool/${poolId.toHexString()}`}
     >
       <div className={classes.content}>

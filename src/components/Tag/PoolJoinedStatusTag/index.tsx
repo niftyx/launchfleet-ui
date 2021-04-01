@@ -55,7 +55,9 @@ export const PoolJoinedStatusTag = (props: IProps) => {
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      <span className={clsx(classes.count)}>141</span>
+      <span className={clsx(classes.count)}>
+        {pool.totalMembers.toNumber()}
+      </span>
       <UsersIcon />
       <div className={classes.progressbar}>
         <div

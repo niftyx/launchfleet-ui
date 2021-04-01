@@ -7,7 +7,7 @@ export const ONE_NUMBER = BigNumber.from(1);
 export const ETH_NUMBER = parseEther("1");
 
 export const isValidHexString = (str: string) => {
-  return /^0[xX][0-9a-fA-F]+$/.test(str);
+  return /^0x[0-9a-fA-F]+$/.test(str);
 };
 
 export const BigNumberMax = (a: BigNumber, b: BigNumber): BigNumber => {

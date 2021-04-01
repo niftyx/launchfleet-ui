@@ -1,6 +1,6 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { MIN_CALC_TOKENS } from "config/constants";
-import { IPool, IToken } from "types";
+import { IPool } from "types";
 
 import { BigNumberMax, BigNumberMin, ZERO_NUMBER } from "./number";
 import { ZERO_ADDRESS } from "./token";

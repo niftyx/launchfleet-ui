@@ -166,7 +166,9 @@ export const PoolItemDetails = (props: IProps) => {
           Progress {percent}%
         </Typography>
         <div className={classes.subRow}>
-          <span className={clsx(classes.count)}>141</span>
+          <span className={clsx(classes.count)}>
+            {pool.totalMembers.toNumber()}
+          </span>
           <UsersIcon />
           {isPrivate ? <PrivateTag /> : <PublicTag />}
         </div>

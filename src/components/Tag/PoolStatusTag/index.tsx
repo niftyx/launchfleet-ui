@@ -1,8 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import moment from "moment";
 import React from "react";
-import { EPoolStatus } from "utils/enums";
+import { IPool } from "types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,12 +27,14 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  status: EPoolStatus;
+  pool: IPool;
 }
 
 export const PoolStatusTag = (props: IProps) => {
   const classes = useStyles();
-  const { status } = props;
+  const {
+    pool: { poolStatus: status },
+  } = props;
 
   return (
     <div className={clsx(classes.root, props.className)}>

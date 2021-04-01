@@ -3,18 +3,16 @@ import { Button, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { PoolItemDetails, PoolStatusTag, Timer, TokenInput } from "components";
 import { DEFAULT_NETWORK_ID } from "config/constants";
-import { getContractAddress, getTokenFromAddress } from "config/networks";
+import { getContractAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
-import moment from "moment";
 import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useEffect, useState } from "react";
 import { ERC20Service } from "services/erc20";
 import { PoolzService } from "services/poolz";
 import { IPool } from "types";
-import { formatBigNumber, waitSeconds } from "utils";
 import { ZERO_NUMBER } from "utils/number";
-import { getMinMaxAllocationPerWallet, getRemainingTimeStr } from "utils/pool";
+import { getMinMaxAllocationPerWallet } from "utils/pool";
 import { ZERO_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
@@ -255,7 +253,7 @@ export const HeroSection = (props: IProps) => {
               <Typography className={classes.inputComment}>
                 Your Bid Amount
               </Typography>
-              <PoolStatusTag status={pool.poolStatus} />
+              <PoolStatusTag pool={pool} />
             </div>
             <TokenInput
               amount={state.amount}
@@ -270,7 +268,10 @@ export const HeroSection = (props: IProps) => {
               }}
               color="primary"
               disabled={
-                state.amount.eq(ZERO_NUMBER) || state.amount.gt(state.balance)
+                state.amount.eq(ZERO_NUMBER) ||
+                state.amount.gt(state.balance) ||
+                state.amount.gt(MaxAllocationPerWallet) ||
+                state.amount.lt(MinAllocationPerWallet)
               }
               fullWidth
               onClick={account ? onJoin : onConnect}

@@ -1,11 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import {
-  Avatar,
-  Button,
-  Hidden,
-  Typography,
-  makeStyles,
-} from "@material-ui/core";
+import { Avatar, Hidden, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { SimpleLoader } from "components/Loader";
 import {
@@ -118,8 +112,7 @@ export const PoolItem = (props: IProps) => {
   const finishTime = pool ? pool.finishTime.toNumber() : 0;
   const startTime = pool ? pool.startTime.toNumber() : 0;
   const nowTime = Math.floor(Date.now() / 1000);
-  const isClosed = nowTime - finishTime > 0;
-  const isLive = startTime <= nowTime && nowTime < finishTime;
+  const isActive = startTime <= nowTime && nowTime < finishTime;
 
   const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
 
@@ -136,7 +129,7 @@ export const PoolItem = (props: IProps) => {
           </div>
           <div className={classes.row}>
             {isPrivate ? <PrivateTag /> : <PublicTag />}
-            <PoolStatusTag status={pool.poolStatus} />
+            <PoolStatusTag pool={pool} />
           </div>
           <div className={classes.row}>
             <PoolPriceTag pool={pool} />
@@ -147,7 +140,7 @@ export const PoolItem = (props: IProps) => {
           <Avatar className={classes.avatar} src={pool.img} />
           <Typography className={classes.title}>{pool.tokenName}</Typography>
           <div className={clsx(classes.itemWrapper, "live")}>
-            <PoolStatusTag status={pool.poolStatus} />
+            <PoolStatusTag pool={pool} />
           </div>
           <div className={clsx(classes.itemWrapper, "tag")}>
             {isPrivate ? <PrivateTag /> : <PublicTag />}
@@ -169,7 +162,7 @@ export const PoolItem = (props: IProps) => {
 
   return (
     <NavLink
-      className={clsx(classes.root, props.className, isClosed ? "" : "active")}
+      className={clsx(classes.root, props.className, isActive ? "active" : "")}
       to={`/pool/${poolId.toHexString()}`}
     >
       {poolLoading ? (
