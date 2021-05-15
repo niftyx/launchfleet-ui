@@ -16,6 +16,7 @@ export enum EPoolDetailsTab {
 export enum ECreatePoolStep {
   TokenInformation = "Token information",
   SwapRules = "Swap rules",
+  MetaInfo = "MetaInfo",
   Confirm = "Confirm",
   Success = "Success",
 }
@@ -27,4 +28,10 @@ export enum EPoolStatus {
   OutOfstock = "OutOfstock",
   Finished = "Finished",
   Close = "Close",
+}
+
+export enum EPoolType {
+  Private,
+  BaseHolder,
+  Public,
 }

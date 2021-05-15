@@ -39,29 +39,29 @@ export const PoolRaisedTag = (props: IProps) => {
   const { networkId } = useConnectedWeb3Context();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
-  const isFilled = pool.leftTokens.eq(ZERO_NUMBER);
-  const isUpcoming = startTime > nowTime;
+  // const isFilled = pool.leftTokens.eq(ZERO_NUMBER);
+  // const isUpcoming = startTime > nowTime;
 
-  const token = getTokenFromAddress(
-    networkId || DEFAULT_NETWORK_ID,
-    pool.mainCoin
-  );
-  const tokenPrice = (price as any)[token.symbol.toLowerCase()].price;
-  const totalRaised = isUpcoming
-    ? pool.startAmount.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
-    : pool.startAmount
-        .sub(pool.leftTokens)
-        .mul(tokenPrice)
-        .div(pool.rate)
-        .div(ETH_NUMBER);
+  // const token = getTokenFromAddress(
+  //   networkId || DEFAULT_NETWORK_ID,
+  //   pool.weiToken
+  // );
+  // const tokenPrice = (price as any)[token.symbol.toLowerCase()].price;
+  // const totalRaised = isUpcoming
+  //   ? pool.tokenTarget.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
+  //   : pool.tokenTarget
+  //       .sub(pool.leftTokens)
+  //       .mul(tokenPrice)
+  //       .div(pool.rate)
+  //       .div(ETH_NUMBER);
 
-  const totalRaisedStr = formatToShortNumber(
-    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
-  );
+  // const totalRaisedStr = formatToShortNumber(
+  //   formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  // );
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      <Typography
+      {/* <Typography
         className={clsx(
           classes.raised,
           isFilled ? "filled" : "",
@@ -72,7 +72,7 @@ export const PoolRaisedTag = (props: IProps) => {
       </Typography>
       <Typography className={classes.raisedComment}>
         {isUpcoming ? "to be raised" : "raised"}
-      </Typography>
+      </Typography> */}
     </div>
   );
 };

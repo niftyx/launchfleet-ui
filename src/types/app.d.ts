@@ -1,6 +1,6 @@
 import { knownTokens } from "config/networks";
 import { BigNumber } from "ethers";
-import { EPoolStatus } from "utils/enums";
+import { EPoolStatus, EPoolType } from "utils/enums";
 
 export interface ISettings {
   theme: THEME;
@@ -18,18 +18,22 @@ export interface IToken {
 
 export type Maybe<T> = T | null;
 
-export type KnownToken = "avax" | "usdt" | "eth";
+export type KnownToken = "matic" | "usdt" | "wmatic" | "launch";
 
 export interface INetwork {
   label: string;
   url: string;
   contracts: {
-    poolz: string;
+    factory: string;
+  };
+  thegraph: {
+    httpUri: string;
+    wsUri: string;
   };
   etherscanUri: string;
 }
 
-export type NetworkId = 43113 | 43114;
+export type NetworkId = 137 | 80001;
 
 export type KnownContracts = keyof INetwork["contracts"];
 
@@ -59,11 +63,9 @@ export interface IGlobalData {
     instruction: string;
     txId: string;
   };
-  globalPoolConfig: {
-    MinETHInvest: BigNumber;
-    MaxETHInvest: BigNumber;
-    MinERC20Invest: BigNumber;
-    MaxERC20Invest: BigNumber;
+  baseTokenInfo: {
+    address: string;
+    amount: BigNumber;
   };
 }
 
@@ -72,44 +74,40 @@ export interface IBasePool {
   tokenSymbol: string;
   tokenDecimals: number;
   tokenName: string;
-  auctionFinishTimestamp: BigNumber; //Until what time the pool will work
-  auctionStartTimestamp: BigNumber;
-  expectedRate: BigNumber; //the rate of the trade
-  pozRate: BigNumber; //the rate for POZ Holders, how much each token = main coin
-  startAmount: BigNumber; //Total amount of the tokens to sell in the pool
-  lockedUntil: number; //False = DSP or True = TLP
-  mainCoin: string; // address(0x0) = ETH, address of main token
-  is21Decimal: boolean; //focus the for smaller tokens.
-  now: BigNumber; // start time
-  whitelistId: BigNumber; // the Id of the Whitelist contract, 0 For turn-off
+  tokenTarget: BigNumber;
+  multiplier: BigNumber;
+  weiToken: string; // address(0x0) = ETH, address of main token
+  minWei: BigNumber;
+  maxWei: BigNumber;
+  poolType: EPoolType;
+  startTime: BigNumber;
+  endTime: BigNumber;
+  claimTime: BigNumber;
+
+  logo: string;
+  name: string;
+  description: string;
+
+  meta: string;
 }
 
 export interface IPool {
-  poolId: BigNumber;
-  // baseData
-  token: string;
+  poolId: string;
+
   creator: string;
-  finishTime: BigNumber;
-  rate: BigNumber;
-  pozRate: BigNumber;
-  startAmount: BigNumber;
-  // moreData
-  lockedUntil: number;
-  leftTokens: BigNumber;
+  token: string;
+  tokenTarget: BigNumber;
+  multiplier: BigNumber;
+  weiToken: string; // address(0x0) = ETH, address of main token
+  minWei: BigNumber;
+  maxWei: BigNumber;
+  poolType: EPoolType;
   startTime: BigNumber;
-  openForAll: BigNumber;
-  unlockedTokens: BigNumber;
-  is21DecimalRate: boolean;
-  // extraData
-  tookLeftOvers: boolean;
-  whiteListId: BigNumber;
-  mainCoin: string;
-  // status
-  poolStatus: EPoolStatus;
+  endTime: BigNumber;
+  claimTime: BigNumber;
+  meta: string;
 
-  //
-  img?: string;
-
+  logo: string;
   //
   tokenName: string;
   tokenSymbol: string;

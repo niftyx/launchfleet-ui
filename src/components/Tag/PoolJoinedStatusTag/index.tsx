@@ -47,10 +47,10 @@ interface IProps {
 export const PoolJoinedStatusTag = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
-  const percentNumber = pool.startAmount
-    .sub(pool.leftTokens)
+  const percentNumber = pool.startTime
+    //.sub(pool.leftTokens)
     .mul(BigNumber.from(100))
-    .div(pool.startAmount);
+    .div(pool.startTime);
   const percent = percentNumber.toNumber();
 
   return (

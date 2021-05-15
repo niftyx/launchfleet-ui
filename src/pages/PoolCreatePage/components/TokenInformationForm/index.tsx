@@ -48,7 +48,7 @@ export const TokenInformationForm = (props: IProps) => {
     tokenName: basePool.tokenName,
     symbol: basePool.tokenSymbol,
     decimals: basePool.tokenDecimals,
-    toToken: basePool.mainCoin,
+    toToken: basePool.weiToken,
   };
   const basicTokenAddresses = Object.keys(tokenIds).map((id) =>
     getToken(
@@ -65,7 +65,7 @@ export const TokenInformationForm = (props: IProps) => {
           ...values,
           tokenSymbol: values.symbol,
           tokenDecimals: values.decimals,
-          mainCoin: values.toToken,
+          weiToken: values.toToken,
         });
       }}
       validationSchema={Yup.object().shape({
@@ -121,6 +121,7 @@ export const TokenInformationForm = (props: IProps) => {
                         .then((token) => {
                           setFieldValue("symbol", token?.symbol);
                           setFieldValue("decimals", token?.decimals);
+                          setFieldValue("tokenName", token?.name);
                         })
                         .catch(() => {
                           setFieldValue("symbol", "");

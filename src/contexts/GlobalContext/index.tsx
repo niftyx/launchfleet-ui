@@ -4,6 +4,7 @@ import { TransactionModal } from "components";
 import {
   DEFAULT_INTERVAL,
   DEFAULT_NETWORK_ID,
+  DEFAULT_READONLY_PROVIDER,
   DEFAULT_USD,
   PRICE_DECIMALS,
 } from "config/constants";
@@ -14,25 +15,31 @@ import { parseEther } from "ethers/lib/utils";
 import { useIsMountedRef } from "hooks";
 import _ from "lodash";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { PoolzService } from "services/poolz";
+import { PoolFactoryService } from "services/poolFactory";
 import { IGlobalData, KnownToken } from "types";
 import { getLogger } from "utils/logger";
 import { MAX_NUMBER, ZERO_NUMBER } from "utils/number";
+import { NULL_ADDRESS } from "utils/token";
 
 const logger = getLogger("GlobalContext::");
 
 const defaultTokenPrices = {
-  avax: {
+  matic: {
     usd: DEFAULT_USD,
     price: ZERO_NUMBER,
     decimals: PRICE_DECIMALS,
   },
-  eth: {
+  wmatic: {
     usd: DEFAULT_USD,
     price: ZERO_NUMBER,
     decimals: PRICE_DECIMALS,
   },
   usdt: {
+    usd: DEFAULT_USD,
+    price: ZERO_NUMBER,
+    decimals: PRICE_DECIMALS,
+  },
+  launch: {
     usd: DEFAULT_USD,
     price: ZERO_NUMBER,
     decimals: PRICE_DECIMALS,
@@ -48,11 +55,9 @@ const defaultData: IGlobalData = {
     instruction: "",
     txId: "",
   },
-  globalPoolConfig: {
-    MinETHInvest: ZERO_NUMBER,
-    MaxETHInvest: ZERO_NUMBER,
-    MinERC20Invest: BigNumber.from("10000"),
-    MaxERC20Invest: MAX_NUMBER,
+  baseTokenInfo: {
+    address: NULL_ADDRESS,
+    amount: ZERO_NUMBER,
   },
 };
 
@@ -150,31 +155,28 @@ export const GlobalProvider = ({ children }: IProps) => {
   };
 
   const loadGlobalPoolConfig = async (): Promise<void> => {
-    const poolzAddress = getContractAddress(
+    const factoryAddress = getContractAddress(
       networkId || DEFAULT_NETWORK_ID,
-      "poolz"
+      "factory"
     );
-    const poolzService = new PoolzService(provider, account, poolzAddress);
+    const factoryService = new PoolFactoryService(
+      provider || DEFAULT_READONLY_PROVIDER,
+      account,
+      factoryAddress
+    );
     try {
-      const [MinETHInvest, MaxETHInvest] = await Promise.all([
-        poolzService.getMinEthInvest(),
-        poolzService.getMaxETHInvest(),
-      ]);
+      const baseInfo = await factoryService.getBaseInfo();
       if (isRefMounted.current === true) {
         setCurrentData((prev) => ({
           ...prev,
-          globalPoolConfig: {
-            ...defaultData.globalPoolConfig,
-            MinETHInvest,
-            MaxETHInvest,
-          },
+          baseTokenInfo: baseInfo,
         }));
       }
     } catch (error) {
       if (isRefMounted.current === true) {
         setCurrentData((prev) => ({
           ...prev,
-          globalPoolConfig: defaultData.globalPoolConfig,
+          baseTokenInfo: defaultData.baseTokenInfo,
         }));
       }
     }
@@ -203,12 +205,9 @@ export const GlobalProvider = ({ children }: IProps) => {
 
   useEffect(() => {
     loadGlobalPoolConfig();
-    const interval = setInterval(loadGlobalPoolConfig, DEFAULT_INTERVAL * 1000);
-    return () => {
-      clearInterval(interval);
-    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [networkId, provider]);
+  }, [provider]);
 
   const handleUpdateData = (update = {}) => {
     const mergedData = _.merge({}, currentData, update);

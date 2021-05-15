@@ -1,7 +1,12 @@
 import { Web3Provider } from "@ethersproject/providers";
 import { ThemeProvider } from "@material-ui/styles";
 import { Web3ReactProvider } from "@web3-react/core";
-import { ConnectedWeb3, GlobalProvider, useSettings } from "contexts";
+import {
+  ApolloProviderWrapper,
+  ConnectedWeb3,
+  GlobalProvider,
+  useSettings,
+} from "contexts";
 import { SnackbarProvider } from "notistack";
 import * as React from "react";
 import { BrowserRouter } from "react-router-dom";
@@ -32,9 +37,11 @@ function App() {
       >
         <Web3ReactProvider getLibrary={getLibrary}>
           <ConnectedWeb3>
-            <GlobalProvider>
-              <BrowserRouter>{renderRoutes(routes as any)}</BrowserRouter>
-            </GlobalProvider>
+            <ApolloProviderWrapper>
+              <GlobalProvider>
+                <BrowserRouter>{renderRoutes(routes as any)}</BrowserRouter>
+              </GlobalProvider>
+            </ApolloProviderWrapper>
           </ConnectedWeb3>
         </Web3ReactProvider>
       </SnackbarProvider>

@@ -3,8 +3,8 @@ import clsx from "clsx";
 import { SimpleLoader } from "components";
 import { useConnectedWeb3Context } from "contexts";
 import React, { useEffect, useState } from "react";
-import { getApiService } from "services/api";
 import { IInvestHistory, IPool } from "types";
+import { waitSeconds } from "utils";
 
 const useStyles = makeStyles((theme) => ({
   root: { marginTop: 24 },
@@ -27,7 +27,6 @@ export const YourAllocations = (props: IProps) => {
     pool: { poolId },
   } = props;
   const { account } = useConnectedWeb3Context();
-  const apiService = getApiService();
 
   useEffect(() => {
     let isMounted = true;
@@ -36,9 +35,9 @@ export const YourAllocations = (props: IProps) => {
       if (!account) return;
       setState((prev) => ({ ...prev, loading: true }));
       try {
-        const res = await apiService.getPoolInvestorHistory(poolId, account);
+        await waitSeconds(3);
         if (isMounted)
-          setState((prev) => ({ ...prev, loading: false, history: res }));
+          setState((prev) => ({ ...prev, loading: false, history: [] }));
       } catch (error) {
         if (isMounted)
           setState((prev) => ({ ...prev, loading: false, history: [] }));

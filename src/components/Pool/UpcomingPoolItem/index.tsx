@@ -90,21 +90,22 @@ export const UpcomingPoolItem = (props: IProps) => {
     provider
   );
 
-  const finishTime = pool ? pool.finishTime.toNumber() : 0;
+  const endTime = pool ? pool.endTime.toNumber() : 0;
   const startTime = pool ? pool.startTime.toNumber() : 0;
 
   const nowTime = Math.floor(Date.now() / 1000);
-  const isClosed = nowTime - finishTime > 0;
-  const isActive = nowTime < finishTime && nowTime >= startTime;
+  const isClosed = nowTime - endTime > 0;
+  const isActive = nowTime < endTime && nowTime >= startTime;
 
-  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
+  // const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
+  const isPrivate = false;
 
   const renderContent = () => {
     if (!pool) return null;
     return (
       <>
         <div className={clsx(classes.section, classes.topWrapper)}>
-          <Avatar className={classes.avatar} src={pool.img} />
+          <Avatar className={classes.avatar} src={pool.logo} />
           <Typography className={classes.title}>{pool.tokenName}</Typography>
           <PoolRaisedTag pool={pool} />
         </div>
@@ -112,10 +113,7 @@ export const UpcomingPoolItem = (props: IProps) => {
           <div className={classes.row}>
             {isPrivate ? <PrivateTag /> : <PublicTag />}
             {!isClosed && (
-              <PoolCloseTimeTag
-                diff={finishTime - nowTime}
-                timestamp={finishTime}
-              />
+              <PoolCloseTimeTag diff={endTime - nowTime} timestamp={endTime} />
             )}
           </div>
           <div className={classes.row}>

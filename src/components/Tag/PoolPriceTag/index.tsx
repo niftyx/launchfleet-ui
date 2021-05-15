@@ -43,15 +43,15 @@ export const PoolPriceTag = (props: IProps) => {
     data: { price },
   } = useGlobal();
   const {
-    pool: { mainCoin, rate, tokenSymbol },
+    pool: { multiplier, tokenSymbol, weiToken },
   } = props;
 
   const mainToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    mainCoin
+    weiToken
   );
   const mainTokenPrice = (price as any)[mainToken.symbol.toLowerCase()];
-  const tokenPrice = mainTokenPrice.price.div(rate);
+  const tokenPrice = mainTokenPrice.price.div(multiplier);
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -60,7 +60,7 @@ export const PoolPriceTag = (props: IProps) => {
       </div>
       <div className={classes.label}>
         1 {mainToken.symbol} ={" "}
-        {formatToShortNumber(formatBigNumber(rate, 0, 0))} {tokenSymbol}
+        {formatToShortNumber(formatBigNumber(multiplier, 0, 0))} {tokenSymbol}
       </div>
     </div>
   );

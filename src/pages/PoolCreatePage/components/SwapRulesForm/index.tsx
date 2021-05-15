@@ -1,15 +1,13 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { Button, Grid, makeStyles } from "@material-ui/core";
 import { ReactComponent as ArrowRightIcon } from "assets/svgs/arrow-right.svg";
-import { ReactComponent as InfoCirlceIcon } from "assets/svgs/info-round-rect.svg";
 import clsx from "clsx";
 import {
-  DspTlpSwitch,
   FormRatioField,
   FormTextField,
+  PoolTypeSelect,
   SimpleLoader,
   TokenInput,
-  YesNoSwitch,
 } from "components";
 import { DEFAULT_NETWORK_ID } from "config/constants";
 import { getTokenFromAddress } from "config/networks";
@@ -20,7 +18,8 @@ import React, { useEffect, useState } from "react";
 import { ERC20Service } from "services/erc20";
 import { IBasePool } from "types";
 import { formatBigNumber } from "utils";
-import { ZERO_NUMBER, isValidHexString } from "utils/number";
+import { EPoolType } from "utils/enums";
+import { ZERO_NUMBER } from "utils/number";
 import * as Yup from "yup";
 
 const useStyles = makeStyles((theme) => ({
@@ -63,17 +62,14 @@ interface IProps {
 }
 
 interface IFormValues {
-  auctionFinishTimestamp: BigNumber;
-  auctionStartTimestamp: BigNumber;
-  expectedRate: BigNumber;
-  pozRate: BigNumber;
-  startAmount: BigNumber;
-  lockedUntil: number;
-  poolzHoldersDifferentRatio: boolean;
-  whitelistId: BigNumber;
-  isPrivate: boolean;
-  isStartNow: boolean;
-  whitelistIdStr: string;
+  tokenTarget: BigNumber;
+  poolType: EPoolType;
+  multiplier: BigNumber;
+  startTime: BigNumber;
+  endTime: BigNumber;
+  claimTime: BigNumber;
+  minWei: BigNumber;
+  maxWei: BigNumber;
 }
 
 interface IState {
@@ -91,7 +87,7 @@ export const SwapRulesForm = (props: IProps) => {
   });
   const token = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    basePool.mainCoin
+    basePool.weiToken
   );
 
   useEffect(() => {
@@ -122,104 +118,72 @@ export const SwapRulesForm = (props: IProps) => {
 
   const renderForm = () => {
     const initialFormValues: IFormValues = {
-      auctionFinishTimestamp: basePool.auctionFinishTimestamp,
-      auctionStartTimestamp: basePool.auctionStartTimestamp,
-      expectedRate: basePool.expectedRate,
-      pozRate: basePool.pozRate,
-      startAmount: basePool.startAmount,
-      lockedUntil: basePool.lockedUntil,
-      poolzHoldersDifferentRatio: !basePool.expectedRate.eq(basePool.pozRate),
-      whitelistId: basePool.whitelistId,
-      isPrivate: !basePool.whitelistId.eq(ZERO_NUMBER),
-      isStartNow: basePool.auctionStartTimestamp.eq(ZERO_NUMBER),
-      whitelistIdStr: basePool.whitelistId.eq(ZERO_NUMBER)
-        ? "0x"
-        : basePool.whitelistId.toHexString(),
+      tokenTarget: basePool.tokenTarget,
+      poolType: basePool.poolType,
+      multiplier: basePool.multiplier,
+      startTime: basePool.startTime,
+      endTime: basePool.endTime,
+      claimTime: basePool.claimTime,
+      minWei: basePool.minWei,
+      maxWei: basePool.maxWei,
     };
 
     return (
       <Formik
         initialValues={initialFormValues}
         onSubmit={(values, { setFieldError }) => {
-          if (values.startAmount.eq(ZERO_NUMBER)) {
-            setFieldError("startAmount", "StartAmount can't be zero.");
+          if (values.tokenTarget.eq(ZERO_NUMBER)) {
+            setFieldError("tokenTarget", "StartAmount can't be zero.");
             return;
           }
-          if (values.expectedRate.eq(ZERO_NUMBER)) {
-            setFieldError("expectedRate", "ExpectedRate can't be zero.");
+          if (values.multiplier.eq(ZERO_NUMBER)) {
+            setFieldError("multiplier", "ExpectedRate can't be zero.");
             return;
           }
-          if (
-            values.pozRate.eq(ZERO_NUMBER) &&
-            values.poolzHoldersDifferentRatio
-          ) {
-            setFieldError("pozRate", "PozRate can't be zero.");
+
+          if (values.minWei.eq(ZERO_NUMBER)) {
+            setFieldError("minWei", "Min Allocation can't be zero.");
             return;
           }
-          if (values.isPrivate && values.whitelistIdStr === "0x") {
-            setFieldError("whitelistIdStr", "WhitelistId can't be empty.");
-            return;
-          }
-          const nowTime = BigNumber.from(Math.floor(Date.now() / 1000));
-          if (values.auctionFinishTimestamp.lt(nowTime)) {
+          if (values.minWei.gte(values.maxWei)) {
             setFieldError(
-              "auctionFinishTimestamp",
-              "FinishTime can't be past time."
+              "maxWei",
+              "Max Allocation should be greater than Min Allocation"
             );
             return;
           }
-          if (!values.isStartNow) {
-            if (values.auctionStartTimestamp.eq(ZERO_NUMBER)) {
-              setFieldError(
-                "auctionStartTimestamp",
-                "StartTime can't be empty."
-              );
-              return;
-            }
-            if (values.auctionStartTimestamp.lt(nowTime)) {
-              setFieldError(
-                "auctionStartTimestamp",
-                "StartTime can't be past time."
-              );
-              return;
-            }
-            if (
-              values.auctionFinishTimestamp.lte(values.auctionStartTimestamp)
-            ) {
-              setFieldError(
-                "auctionFinishTimestamp",
-                "FinishTime can't before StartTime"
-              );
-              return;
-            }
+
+          const nowTime = BigNumber.from(Math.floor(Date.now() / 1000));
+          if (values.startTime.lte(nowTime)) {
+            setFieldError("startTime", "StartTime can't be past time.");
+            return;
+          }
+          if (values.endTime.lte(values.startTime)) {
+            setFieldError("endTime", "EndTime can't be earlier than startTime");
+            return;
+          }
+          if (values.claimTime.lte(values.endTime)) {
+            setFieldError(
+              "claimTime",
+              "ClaimTime can't be earlier than endTime"
+            );
+            return;
           }
 
           const payloadValues = { ...values };
 
-          if (!values.poolzHoldersDifferentRatio) {
-            payloadValues.pozRate = values.expectedRate;
-          }
-          if (values.isStartNow) {
-            payloadValues.auctionStartTimestamp = ZERO_NUMBER;
-          }
-          if (values.isPrivate) {
-            payloadValues.whitelistId = BigNumber.from(values.whitelistIdStr);
-          } else {
-            payloadValues.whitelistId = ZERO_NUMBER;
-          }
-
           onNext(payloadValues);
         }}
         validationSchema={Yup.object().shape({
-          auctionFinishTimestamp: Yup.string().required(),
+          startTime: Yup.string().required(),
+          endTime: Yup.string().required(),
+          claimTime: Yup.string().required(),
         })}
       >
         {({
           errors,
           handleBlur,
-          handleChange,
           handleSubmit,
-          isSubmitting,
           isValid,
           setFieldValue,
           touched,
@@ -234,20 +198,19 @@ export const SwapRulesForm = (props: IProps) => {
                 <FormRatioField
                   FormControlProps={{ fullWidth: true }}
                   FormHelperTextProps={{
-                    error: Boolean(touched.expectedRate && errors.expectedRate),
+                    error: Boolean(touched.multiplier && errors.multiplier),
                   }}
                   InputLabelProps={{ htmlFor: "token", shrink: true }}
                   helperText={
-                    (touched["expectedRate"] &&
-                      errors["expectedRate"]) as string
+                    (touched["multiplier"] && errors["multiplier"]) as string
                   }
                   integerOnly
                   label="Swap ratio"
-                  onChange={(expectedRate) =>
-                    setFieldValue("expectedRate", expectedRate)
+                  onChange={(multiplier) =>
+                    setFieldValue("multiplier", multiplier)
                   }
                   tokenSymbol={token.symbol}
-                  value={values.expectedRate}
+                  value={values.multiplier}
                 />
               </Grid>
               <Grid item sm={6} xs={12}>
@@ -259,18 +222,18 @@ export const SwapRulesForm = (props: IProps) => {
                 </div>
                 <TokenInput
                   FormHelperTextProps={{
-                    error: Boolean(touched.startAmount && errors.startAmount),
+                    error: Boolean(touched.tokenTarget && errors.tokenTarget),
                   }}
-                  amount={values.startAmount}
+                  amount={values.tokenTarget}
                   helperText={
-                    (touched["startAmount"] && errors["startAmount"]) as string
+                    (touched["tokenTarget"] && errors["tokenTarget"]) as string
                   }
                   maxVisible
-                  onChangeValue={(startAmount) =>
-                    setFieldValue("startAmount", startAmount)
+                  onChangeValue={(tokenTarget) =>
+                    setFieldValue("tokenTarget", tokenTarget)
                   }
                   onMax={() => {
-                    setFieldValue("startAmount", state.balance);
+                    setFieldValue("tokenTarget", state.balance);
                   }}
                 />
               </Grid>
@@ -278,199 +241,154 @@ export const SwapRulesForm = (props: IProps) => {
                 <FormTextField
                   FormControlProps={{ fullWidth: true }}
                   FormHelperTextProps={{
-                    error: Boolean(
-                      touched.auctionFinishTimestamp &&
-                        errors.auctionFinishTimestamp
-                    ),
+                    error: Boolean(touched.startTime && errors.startTime),
                   }}
                   InputLabelProps={{
-                    htmlFor: "auctionFinishTimestamp",
+                    htmlFor: "startTime",
                     shrink: true,
                   }}
                   InputProps={{
-                    id: "auctionFinishTimestamp",
-                    name: "auctionFinishTimestamp",
+                    id: "startTime",
+                    name: "startTime",
                     onBlur: handleBlur,
                     onChange: (e) => {
                       const time = moment(e.target.value).utc().valueOf();
                       setFieldValue(
-                        "auctionFinishTimestamp",
+                        "startTime",
                         BigNumber.from(`${Math.floor(time / 1000)}`)
                       );
                     },
                     placeholder: "",
-                    value: values.auctionFinishTimestamp.eq(ZERO_NUMBER)
+                    value: values.startTime.eq(ZERO_NUMBER)
                       ? ""
-                      : moment(
-                          values.auctionFinishTimestamp.toNumber() * 1000
-                        ).format("yyyy-MM-DDThh:mm"),
+                      : moment(values.startTime.toNumber() * 1000).format(
+                          "yyyy-MM-DDThh:mm"
+                        ),
                     required: true,
                     disableUnderline: true,
                     type: "datetime-local",
                   }}
                   helperText={
-                    (touched["auctionFinishTimestamp"] &&
-                      errors["auctionFinishTimestamp"]) as string
+                    (touched["startTime"] && errors["startTime"]) as string
                   }
-                  label="Pool finish time"
+                  label="Pool start time"
                 />
               </Grid>
               <Grid item sm={6} xs={12}>
-                <div className={clsx(classes.label, "switchLabel", "noMargin")}>
-                  <div className={classes.subLabel}>
-                    <span>Start pool after creation?</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <InfoCirlceIcon />
-                  </div>
-                  <YesNoSwitch
-                    checked={values.isStartNow}
-                    onToggle={() => {
-                      setFieldValue("isStartNow", !values.isStartNow);
-                    }}
-                  />
-                </div>
-                {!values.isStartNow && (
-                  <FormTextField
-                    FormControlProps={{ fullWidth: true }}
-                    FormHelperTextProps={{
-                      error: Boolean(
-                        touched.auctionStartTimestamp &&
-                          errors.auctionStartTimestamp
-                      ),
-                    }}
-                    InputLabelProps={{
-                      htmlFor: "auctionStartTimestamp",
-                      shrink: true,
-                    }}
-                    InputProps={{
-                      id: "auctionStartTimestamp",
-                      name: "auctionStartTimestamp",
-                      onBlur: handleBlur,
-                      onChange: (e) => {
-                        const time = moment(e.target.value).utc().valueOf();
-                        setFieldValue(
-                          "auctionStartTimestamp",
-                          BigNumber.from(`${Math.floor(time / 1000)}`)
-                        );
-                      },
-                      placeholder: "",
-                      value: values.auctionStartTimestamp.eq(ZERO_NUMBER)
-                        ? ""
-                        : moment(
-                            values.auctionStartTimestamp.toNumber() * 1000
-                          ).format("yyyy-MM-DDThh:mm"),
-                      required: false,
-                      disableUnderline: true,
-                      type: "datetime-local",
-                    }}
-                    helperText={
-                      (touched["auctionStartTimestamp"] &&
-                        errors["auctionStartTimestamp"]) as string
-                    }
-                    label="Pool start time"
-                  />
-                )}
-              </Grid>
-              <Grid item sm={6} xs={12}>
-                <div className={clsx(classes.label, "switchLabel", "noMargin")}>
-                  <div className={classes.subLabel}>
-                    <span>Different swap ratio for poolz holders?</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <InfoCirlceIcon />
-                  </div>
-                  <YesNoSwitch
-                    checked={values.poolzHoldersDifferentRatio}
-                    onToggle={() => {
+                <FormTextField
+                  FormControlProps={{ fullWidth: true }}
+                  FormHelperTextProps={{
+                    error: Boolean(touched.endTime && errors.endTime),
+                  }}
+                  InputLabelProps={{
+                    htmlFor: "endTime",
+                    shrink: true,
+                  }}
+                  InputProps={{
+                    id: "endTime",
+                    name: "endTime",
+                    onBlur: handleBlur,
+                    onChange: (e) => {
+                      const time = moment(e.target.value).utc().valueOf();
                       setFieldValue(
-                        "poolzHoldersDifferentRatio",
-                        !values.poolzHoldersDifferentRatio
+                        "endTime",
+                        BigNumber.from(`${Math.floor(time / 1000)}`)
                       );
-                    }}
-                  />
-                </div>
-                {values.poolzHoldersDifferentRatio && (
-                  <FormRatioField
-                    FormControlProps={{ fullWidth: true }}
-                    FormHelperTextProps={{
-                      error: Boolean(touched.pozRate && errors.pozRate),
-                    }}
-                    InputLabelProps={{ htmlFor: "token", shrink: true }}
-                    helperText={
-                      (touched["pozRate"] && errors["pozRate"]) as string
-                    }
-                    integerOnly
-                    label="Pool holders swap ratio"
-                    onChange={(pozRate) => setFieldValue("pozRate", pozRate)}
-                    tokenSymbol={token.symbol}
-                    value={values.pozRate}
-                  />
-                )}
+                    },
+                    placeholder: "",
+                    value: values.endTime.eq(ZERO_NUMBER)
+                      ? ""
+                      : moment(values.endTime.toNumber() * 1000).format(
+                          "yyyy-MM-DDThh:mm"
+                        ),
+                    required: true,
+                    disableUnderline: true,
+                    type: "datetime-local",
+                  }}
+                  helperText={
+                    (touched["endTime"] && errors["endTime"]) as string
+                  }
+                  label="Pool end time"
+                />
               </Grid>
               <Grid item sm={6} xs={12}>
-                <div className={clsx(classes.label, "switchLabel")}>
-                  <div className={classes.subLabel}>
-                    <span>Lock-in period rules</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <InfoCirlceIcon />
-                  </div>
-                  <DspTlpSwitch
-                    isDsp={values.lockedUntil === 0}
-                    setDsp={(lockedUntil) => {
-                      setFieldValue("lockedUntil", lockedUntil);
-                    }}
-                  />
-                </div>
-                <div className={clsx(classes.label, "switchLabel")}>
-                  <div className={classes.subLabel}>
-                    <span>Create a private pool?</span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <InfoCirlceIcon />
-                  </div>
-                  <YesNoSwitch
-                    checked={values.isPrivate}
-                    onToggle={() => {
-                      setFieldValue("isPrivate", !values.isPrivate);
-                    }}
-                  />
-                </div>
+                <FormTextField
+                  FormControlProps={{ fullWidth: true }}
+                  FormHelperTextProps={{
+                    error: Boolean(touched.claimTime && errors.claimTime),
+                  }}
+                  InputLabelProps={{
+                    htmlFor: "claimTime",
+                    shrink: true,
+                  }}
+                  InputProps={{
+                    id: "claimTime",
+                    name: "claimTime",
+                    onBlur: handleBlur,
+                    onChange: (e) => {
+                      const time = moment(e.target.value).utc().valueOf();
+                      setFieldValue(
+                        "claimTime",
+                        BigNumber.from(`${Math.floor(time / 1000)}`)
+                      );
+                    },
+                    placeholder: "",
+                    value: values.claimTime.eq(ZERO_NUMBER)
+                      ? ""
+                      : moment(values.claimTime.toNumber() * 1000).format(
+                          "yyyy-MM-DDThh:mm"
+                        ),
+                    required: true,
+                    disableUnderline: true,
+                    type: "datetime-local",
+                  }}
+                  helperText={
+                    (touched["claimTime"] && errors["claimTime"]) as string
+                  }
+                  label="Pool claim time"
+                />
               </Grid>
-              {values.isPrivate && (
-                <Grid item sm={6} xs={12}>
-                  <FormTextField
-                    FormControlProps={{ fullWidth: true }}
-                    FormHelperTextProps={{
-                      error: Boolean(
-                        touched.whitelistIdStr && errors.whitelistIdStr
-                      ),
-                    }}
-                    InputLabelProps={{
-                      htmlFor: "whitelistIdStr",
-                      shrink: true,
-                    }}
-                    InputProps={{
-                      id: "whitelistIdStr",
-                      name: "whitelistIdStr",
-                      onBlur: handleBlur,
-                      onChange: (e) => {
-                        const { value } = e.target;
-                        if (value.length < 2) {
-                          setFieldValue("whitelistIdStr", "0x");
-                          return;
-                        }
-                        if (isValidHexString(value)) {
-                          handleChange(e);
-                        }
-                      },
-                      placeholder: "",
-                      value: values.whitelistIdStr,
-                      required: true,
-                      disableUnderline: true,
-                    }}
-                    helperText={touched.whitelistIdStr && errors.whitelistIdStr}
-                    label="Whitelist contract id"
-                  />
-                </Grid>
-              )}
+              <Grid item sm={6} xs={12}>
+                <div className={classes.label}>
+                  <span>Min Allocation Per Wallet</span>
+                </div>
+                <TokenInput
+                  FormHelperTextProps={{
+                    error: Boolean(touched.minWei && errors.minWei),
+                  }}
+                  amount={values.minWei}
+                  helperText={(touched["minWei"] && errors["minWei"]) as string}
+                  maxVisible={false}
+                  onChangeValue={(minWei) => setFieldValue("minWei", minWei)}
+                  onMax={() => {}}
+                />
+              </Grid>
+              <Grid item sm={6} xs={12}>
+                <div className={classes.label}>
+                  <span>Max Allocation Per Wallet</span>
+                </div>
+                <TokenInput
+                  FormHelperTextProps={{
+                    error: Boolean(touched.maxWei && errors.maxWei),
+                  }}
+                  amount={values.maxWei}
+                  helperText={(touched["maxWei"] && errors["maxWei"]) as string}
+                  maxVisible={false}
+                  onChangeValue={(maxWei) => setFieldValue("maxWei", maxWei)}
+                  onMax={() => {}}
+                />
+              </Grid>
+              <Grid item lg={6} xs={12}>
+                <div className={clsx(classes.label, "switchLabel")}>
+                  <span>Pool Type</span>
+                </div>
+                <PoolTypeSelect
+                  onChange={(poolType) => {
+                    setFieldValue("poolType", poolType);
+                  }}
+                  poolType={values.poolType}
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <Button

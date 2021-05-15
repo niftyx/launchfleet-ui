@@ -77,18 +77,16 @@ export const PoolDetails = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
   const {
-    data: { globalPoolConfig },
+    data: { baseTokenInfo },
   } = useGlobal();
   const { networkId } = useConnectedWeb3Context();
   const mainToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    pool.mainCoin
+    pool.weiToken
   );
-  const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
-  const {
-    MaxAllocationPerWallet,
-    MinAllocationPerWallet,
-  } = getMinMaxAllocationPerWallet(pool, globalPoolConfig, isPrivate);
+  const isPrivate = false;
+  const MaxAllocationPerWallet = ZERO_NUMBER,
+    MinAllocationPerWallet = ZERO_NUMBER;
 
   return (
     <div className={clsx(classes.root, props.className)}>

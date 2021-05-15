@@ -12,33 +12,35 @@ export const STORAGE_KEY_CONNECTOR = "CONNECTOR";
 export const LOGGER_ID = "snowstorm";
 
 export const TEST_MODE = Boolean(Number(process.env.REACT_APP_TEST || "1"));
-export const API_URL = String(process.env.REACT_APP_API_URL || "");
 
-export const DEFAULT_NETWORK_ID: NetworkId = TEST_MODE ? 43113 : 43114;
+export const DEFAULT_NETWORK_ID: NetworkId = TEST_MODE ? 80001 : 137;
 
 export const API_RPS = 10;
 export const PRICE_DECIMALS = 18;
 export const DEFAULT_DECIMALS = 18;
 export const DEFAULT_USD = 0;
-export const DEFAULT_INTERVAL = 15;
+export const DEFAULT_INTERVAL = 30;
 
 export const PAGE_ITEMS = BigNumber.from(5);
 export const MIN_CALC_TOKENS = parseEther("10");
+
+export const DEFAULT_MIN_WEI = parseEther("0.1");
+export const DEFAULT_MAX_WEI = parseEther("1");
 
 export const NETWORK_CONFIG = TEST_MODE
   ? {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: "0xa869",
-          chainName: "Fuji Testnet",
+          chainId: "0x13881",
+          chainName: "Mumbai Testnet",
           nativeCurrency: {
-            name: "AVAX",
-            symbol: "AVAX",
+            name: "Polygon",
+            symbol: "MATIC",
             decimals: 18,
           },
-          rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
-          blockExplorerUrls: ["https://cchain.explorer.avax-test.network/"],
+          rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+          blockExplorerUrls: ["https://mumbai-explorer.matic.today"],
         },
       ],
     }
@@ -46,15 +48,15 @@ export const NETWORK_CONFIG = TEST_MODE
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: "0xa86a",
-          chainName: "Avalanche Mainnet",
+          chainId: "0x89",
+          chainName: "Matic Mainnet",
           nativeCurrency: {
-            name: "AVAX",
-            symbol: "AVAX",
+            name: "Polygon",
+            symbol: "MATIC",
             decimals: 18,
           },
-          rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
-          blockExplorerUrls: ["https://cchain.explorer.avax.network/"],
+          rpcUrls: ["https://rpc-mainnet.maticvigil.com/"],
+          blockExplorerUrls: ["https://explorer.matic.network/"],
         },
       ],
     };
@@ -76,3 +78,13 @@ export const SOCIAL_LINKS = [
   { href: "/telegram", icon: TelegramIcon },
   { href: "/twitter", icon: TwitterIcon },
 ];
+
+export const IPFS_CONFIG = {
+  host: "ipfs.infura.io",
+  port: 5001,
+  protocol: "https",
+};
+
+export const IPFS_IMAGE_ENDPOINT = `https://cloudflare-ipfs.com/ipfs/`;
+
+export const LOGO_IMAGE_FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB

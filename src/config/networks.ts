@@ -6,30 +6,38 @@ import {
   KnownToken,
   NetworkId,
 } from "types";
-import { ZERO_ADDRESS } from "utils/token";
+import { NULL_ADDRESS } from "utils/token";
 import { entries } from "utils/type-utils";
 
 export const networkIds = {
-  AVAXTEST: 43113,
-  AVAXMAIN: 43114,
+  MATIC: 137,
+  MUMBAI: 80001,
 } as const;
 
 const networks: { [K in NetworkId]: INetwork } = {
-  [networkIds.AVAXTEST]: {
-    label: "AVAX TEST",
-    url: "https://api.avax-test.network/ext/bc/C/rpc",
+  [networkIds.MUMBAI]: {
+    label: "Mumbai Testnet",
+    url: "https://rpc-mumbai.maticvigil.com/",
     contracts: {
-      poolz: "0x6D9DF5b4eF96399165718E7aC41eC12C35921f53",
+      factory: "0xbbc9246EDB0f5942C847bD5eE728d5325063F310",
     },
-    etherscanUri: "https://cchain.explorer.avax-test.network/",
+    etherscanUri: "https://mumbai-explorer.matic.today/",
+    thegraph: {
+      httpUri: "https://api.thegraph.com/subgraphs/name/altbee/launch-test",
+      wsUri: "wss://api.thegraph.com/subgraphs/name/altbee/launch-test",
+    },
   },
-  [networkIds.AVAXMAIN]: {
-    label: "AVAX Main",
-    url: "https://api.avax.network/ext/bc/C/rpc",
+  [networkIds.MATIC]: {
+    label: "Matic Mainnet",
+    url: "https://rpc-mainnet.maticvigil.com/",
     contracts: {
-      poolz: "0x6D9DF5b4eF96399165718E7aC41eC12C35921f53",
+      factory: "0xbbc9246EDB0f5942C847bD5eE728d5325063F310",
     },
-    etherscanUri: "https://cchain.explorer.avax.network/",
+    etherscanUri: "https://explorer.matic.network/",
+    thegraph: {
+      httpUri: "https://api.thegraph.com/subgraphs/name/altbee/launch-test",
+      wsUri: "wss://api.thegraph.com/subgraphs/name/altbee/launch-test",
+    },
   },
 };
 
@@ -38,35 +46,35 @@ export const supportedNetworkIds = Object.keys(networks).map(
 ) as NetworkId[];
 
 export const tokenIds = {
-  avax: "avax",
-  eth: "eth",
+  matic: "matic",
+  wmatic: "wmatic",
   usdt: "usdt",
 };
 
 export const knownTokens: { [name in KnownToken]: IKnownTokenData } = {
-  avax: {
-    symbol: "AVAX",
+  matic: {
+    symbol: "MATIC",
     decimals: 18,
-    name: "Avalanche",
+    name: "Polygon",
     image:
-      "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/ethereum-tokens/0x9dEbca6eA3af87Bf422Cea9ac955618ceb56EfB4/logo.png",
+      "https://github.com/trustwallet/assets/blob/master/blockchains/polygon/info/logo.png",
     addresses: {
-      [networkIds.AVAXTEST]: ZERO_ADDRESS,
-      [networkIds.AVAXMAIN]: ZERO_ADDRESS,
+      [networkIds.MUMBAI]: NULL_ADDRESS,
+      [networkIds.MATIC]: NULL_ADDRESS,
     },
-    coingeckoTokenId: "avalanche-2",
+    coingeckoTokenId: "matic-network",
   },
-  eth: {
-    symbol: "ETH",
+  wmatic: {
+    symbol: "WMATIC",
     decimals: 18,
-    name: "Ether (Wrapped)",
+    name: "Wrapped Matic",
     image:
-      "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15/logo.png",
+      "https://raw.githubusercontent.com/sushiswap/assets/master/blockchains/polygon/assets/0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270/logo.png",
     addresses: {
-      [networkIds.AVAXTEST]: "0xc126c54E0f85cFe907D8444D740fF5e071C9CAD5",
-      [networkIds.AVAXMAIN]: "0xf20d962a6c8f70c731bd838a3a388d7d48fa6e15",
+      [networkIds.MUMBAI]: "0x8377da69E99e6DB975fCa7677C2f07C5792a4acc",
+      [networkIds.MATIC]: "0x8377da69E99e6DB975fCa7677C2f07C5792a4acc",
     },
-    coingeckoTokenId: "ethereum",
+    coingeckoTokenId: "wmatic",
   },
   usdt: {
     symbol: "USDT",
@@ -75,8 +83,20 @@ export const knownTokens: { [name in KnownToken]: IKnownTokenData } = {
     image:
       "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xde3A24028580884448a5397872046a019649b084/logo.png",
     addresses: {
-      [networkIds.AVAXTEST]: "0x348eeeF3e45efDcc0d5A043C3909C28d03084F13",
-      [networkIds.AVAXMAIN]: "0xde3a24028580884448a5397872046a019649b084",
+      [networkIds.MUMBAI]: "0xd7a65c9B81Fec5F73E8eC1996B1c541cC059b0F3",
+      [networkIds.MATIC]: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    },
+    coingeckoTokenId: "tether",
+  },
+  launch: {
+    symbol: "LAUNCH",
+    decimals: 18,
+    name: "LAUNCH TOKEN",
+    image:
+      "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xde3A24028580884448a5397872046a019649b084/logo.png",
+    addresses: {
+      [networkIds.MUMBAI]: "0x496BF10c5D16590e0Fc0feC10f28d7C2B67768C8",
+      [networkIds.MATIC]: "0x496BF10c5D16590e0Fc0feC10f28d7C2B67768C8",
     },
     coingeckoTokenId: "tether",
   },
@@ -182,4 +202,14 @@ export const getEtherscanUri = (networkId: number): string => {
   }
 
   return networks[networkId].etherscanUri;
+};
+
+export const getGraphUris = (
+  networkId: number
+): { httpUri: string; wsUri: string } => {
+  if (!validNetworkId(networkId)) {
+    throw new Error(`Unsupported network id: '${networkId}'`);
+  }
+
+  return networks[networkId].thegraph;
 };

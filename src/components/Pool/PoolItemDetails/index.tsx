@@ -10,6 +10,7 @@ import { useConnectedWeb3Context, useGlobal } from "contexts";
 import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, formatToShortNumber, shortenAddress } from "utils";
+import { EPoolType } from "utils/enums";
 import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
@@ -99,34 +100,34 @@ export const PoolItemDetails = (props: IProps) => {
   const nowTime = Math.floor(Date.now() / 1000);
   const mainToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    pool.mainCoin
+    pool.weiToken
   );
   const isUpcoming = startTime > nowTime;
-  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
+  const isPrivate = pool ? pool.poolType === EPoolType.Private : false;
 
-  const percentNumber = pool.startAmount
-    .sub(pool.leftTokens)
-    .mul(BigNumber.from(100))
-    .div(pool.startAmount);
-  const percent = percentNumber.toNumber();
+  // const percentNumber = pool.tokenTarget
+  //   .sub(pool.leftTokens)
+  //   .mul(BigNumber.from(100))
+  //   .div(pool.tokenTarget);
+  // const percent = percentNumber.toNumber();
 
-  const tokenPrice = (price as any)[mainToken.symbol.toLowerCase()].price;
-  const totalRaised = isUpcoming
-    ? pool.startAmount.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
-    : pool.startAmount
-        .sub(pool.leftTokens)
-        .mul(tokenPrice)
-        .div(pool.rate)
-        .div(ETH_NUMBER);
+  // const tokenPrice = (price as any)[mainToken.symbol.toLowerCase()].price;
+  // const totalRaised = isUpcoming
+  //   ? pool.tokenTarget.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
+  //   : pool.tokenTarget
+  //       .sub(pool.leftTokens)
+  //       .mul(tokenPrice)
+  //       .div(pool.rate)
+  //       .div(ETH_NUMBER);
 
-  const totalRaisedStr = formatToShortNumber(
-    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
-  );
+  // const totalRaisedStr = formatToShortNumber(
+  //   formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  // );
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      <div className={classes.row}>
-        <Avatar className={classes.avatar} src={pool.img} />
+      {/* <div className={classes.row}>
+        <Avatar className={classes.avatar} src={pool.logo} />
         <Typography className={classes.title}>{pool.tokenName}</Typography>
         <Typography className={classes.address}>
           {shortenAddress(pool.token)}
@@ -172,7 +173,7 @@ export const PoolItemDetails = (props: IProps) => {
           <UsersIcon />
           {isPrivate ? <PrivateTag /> : <PublicTag />}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -32,14 +32,14 @@ interface IProps {
 
 export const PoolStatusTag = (props: IProps) => {
   const classes = useStyles();
-  const {
-    pool: { poolStatus: status },
-  } = props;
+  // const {
+  //   pool: { poolStatus: status },
+  // } = props;
 
   return (
     <div className={clsx(classes.root, props.className)}>
       <span className={clsx(classes.tag)}></span>
-      <span className={classes.label}>{status}</span>
+      {/* <span className={classes.label}>{status}</span> */}
     </div>
   );
 };

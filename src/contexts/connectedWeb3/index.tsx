@@ -68,6 +68,7 @@ export const ConnectedWeb3: React.FC = (props) => {
   useEffect(() => {
     const connector = localStorage.getItem(STORAGE_KEY_CONNECTOR);
     if (error) {
+      console.error("=====", error);
       localStorage.removeItem(STORAGE_KEY_CONNECTOR);
       deactivate();
       updateInitialized();

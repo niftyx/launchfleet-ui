@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  poolId: BigNumber;
+  poolId: string;
 }
 
 export const SuccessSection = (props: IProps) => {
@@ -56,10 +56,7 @@ export const SuccessSection = (props: IProps) => {
       <Typography align="center" className={classes.description}>
         We are going to review your pool and will list it in no time.
       </Typography>
-      <NavLink
-        className={classes.link}
-        to={`/pool/${props.poolId.toHexString()}`}
-      >
+      <NavLink className={classes.link} to={`/pool/${props.poolId}`}>
         Go to pool
       </NavLink>
     </div>

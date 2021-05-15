@@ -137,7 +137,7 @@ export const HeaderSection = (props: IProps) => {
           </div>
         </div>
         <Typography className={classes.progressText} color="primary">
-          Step {stepIndex + 1} of 3
+          Step {stepIndex + 1} of 4
         </Typography>
       </div>
     </div>

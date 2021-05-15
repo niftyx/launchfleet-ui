@@ -3,7 +3,7 @@ import { MIN_CALC_TOKENS } from "config/constants";
 import { IPool } from "types";
 
 import { BigNumberMax, BigNumberMin, ZERO_NUMBER } from "./number";
-import { ZERO_ADDRESS } from "./token";
+import { NULL_ADDRESS } from "./token";
 
 export const getRemainingTimeStr = (time: number): string => {
   return [
@@ -35,13 +35,13 @@ export const getMinMaxAllocationPerWallet = (
     MaxAllocationPerWallet: ZERO_NUMBER,
   };
 
-  const rate = isPrivate ? pool.pozRate : pool.rate;
-  const leftTokens = pool.leftTokens;
+  const rate = pool.multiplier;
+  const leftTokens = ZERO_NUMBER;
 
   const maxAllocation = leftTokens.div(rate);
   const minAllocation = MIN_CALC_TOKENS.div(rate);
 
-  const isMainToken = pool.mainCoin === ZERO_ADDRESS;
+  const isMainToken = pool.weiToken === NULL_ADDRESS;
 
   if (isMainToken) {
     result.MinAllocationPerWallet = BigNumberMax(

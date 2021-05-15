@@ -14,6 +14,7 @@ import { useConnectedWeb3Context } from "contexts";
 import { usePoolDetails } from "hooks";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { EPoolType } from "utils/enums";
 import { ZERO_NUMBER } from "utils/number";
 
 const useStyles = makeStyles((theme) => ({
@@ -109,12 +110,12 @@ export const PoolItem = (props: IProps) => {
     provider
   );
 
-  const finishTime = pool ? pool.finishTime.toNumber() : 0;
+  const finishTime = pool ? pool.endTime.toNumber() : 0;
   const startTime = pool ? pool.startTime.toNumber() : 0;
   const nowTime = Math.floor(Date.now() / 1000);
   const isActive = startTime <= nowTime && nowTime < finishTime;
 
-  const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
+  const isPrivate = pool ? pool.poolType === EPoolType.Private : false;
 
   const renderContent = () => {
     if (!pool) return null;
@@ -123,7 +124,7 @@ export const PoolItem = (props: IProps) => {
       <>
         <Hidden mdUp>
           <div className={classes.row}>
-            <Avatar className={classes.avatar} src={pool.img} />
+            <Avatar className={classes.avatar} src={pool.logo} />
             <Typography className={classes.title}>{pool.tokenName}</Typography>
             <PoolRaisedTag pool={pool} />
           </div>
@@ -137,7 +138,7 @@ export const PoolItem = (props: IProps) => {
           </div>
         </Hidden>
         <Hidden smDown>
-          <Avatar className={classes.avatar} src={pool.img} />
+          <Avatar className={classes.avatar} src={pool.logo} />
           <Typography className={classes.title}>{pool.tokenName}</Typography>
           <div className={clsx(classes.itemWrapper, "live")}>
             <PoolStatusTag pool={pool} />

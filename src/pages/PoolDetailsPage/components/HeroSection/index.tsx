@@ -9,11 +9,11 @@ import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useEffect, useState } from "react";
 import { ERC20Service } from "services/erc20";
-import { PoolzService } from "services/poolz";
+import { PoolFactoryService } from "services/poolFactory";
 import { IPool } from "types";
 import { ZERO_NUMBER } from "utils/number";
 import { getMinMaxAllocationPerWallet } from "utils/pool";
-import { ZERO_ADDRESS } from "utils/token";
+import { NULL_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -88,10 +88,7 @@ interface IState {
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
   const { pool, poolId, reloadPoolInfo } = props;
-  const {
-    data: { globalPoolConfig },
-    setTxModalData,
-  } = useGlobal();
+  const { setTxModalData } = useGlobal();
   const {
     account,
     library: provider,
@@ -100,17 +97,15 @@ export const HeroSection = (props: IProps) => {
   } = useConnectedWeb3Context();
   const { enqueueSnackbar } = useSnackbar();
 
-  const finishTime = pool.finishTime.toNumber();
+  const endTime = pool.endTime.toNumber();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
-  const isLive = startTime <= nowTime && nowTime < finishTime;
-  const isMainCoinAvax = pool.mainCoin === ZERO_ADDRESS;
-  const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
+  // const isLive = startTime <= nowTime && nowTime < endTime;
+  const isMainCoinAvax = pool.weiToken === NULL_ADDRESS;
+  // const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
 
-  const {
-    MaxAllocationPerWallet,
-    MinAllocationPerWallet,
-  } = getMinMaxAllocationPerWallet(pool, globalPoolConfig, isPrivate);
+  const MaxAllocationPerWallet = ZERO_NUMBER,
+    MinAllocationPerWallet = ZERO_NUMBER;
 
   const [state, setState] = useState<IState>({
     amount: ZERO_NUMBER,
@@ -133,7 +128,7 @@ export const HeroSection = (props: IProps) => {
           const erc20Service = new ERC20Service(
             provider,
             account,
-            pool.mainCoin
+            pool.weiToken
           );
           const balance = await erc20Service.getBalanceOf(account || "");
           if (isMounted) setState((prev) => ({ ...prev, balance }));
@@ -164,81 +159,79 @@ export const HeroSection = (props: IProps) => {
 
   const onJoin = async () => {
     if (!provider) return;
-    const poolContractAddress = getContractAddress(
+    const factoryAddress = getContractAddress(
       networkId || DEFAULT_NETWORK_ID,
-      "poolz"
+      "factory"
     );
-    const poolzService = new PoolzService(
-      provider,
-      account,
-      poolContractAddress
-    );
-    try {
-      if (isMainCoinAvax) {
-        setTxModalData(true, "Investing ...", "Follow wallet instructions");
-        const txHash = await poolzService.investETH(
-          poolId,
-          state.amount,
-          account || ""
-        );
-        setTxModalData(
-          true,
-          "Investing ...",
-          "Please wait until the transaction is confirmed!",
-          txHash
-        );
-        await provider.waitForTransaction(txHash);
-        setTxModalData(true, "Reloading ...");
-        await reloadPoolInfo();
-        setTxModalData(false);
-      } else {
-        const erc20Service = new ERC20Service(provider, account, pool.mainCoin);
-        setTxModalData(true, "Loading ...");
+    const factoryService = new PoolFactoryService(provider, "", factoryAddress);
+    // try {
+    //   if (isMainCoinAvax) {
+    //     setTxModalData(true, "Investing ...", "Follow wallet instructions");
+    //     const txHash = await poolzService.investETH(
+    //       poolId,
+    //       state.amount,
+    //       account || ""
+    //     );
+    //     setTxModalData(
+    //       true,
+    //       "Investing ...",
+    //       "Please wait until the transaction is confirmed!",
+    //       txHash
+    //     );
+    //     await provider.waitForTransaction(txHash);
+    //     setTxModalData(true, "Reloading ...");
+    //     await reloadPoolInfo();
+    //     setTxModalData(false);
+    //   } else {
+    //     const erc20Service = new ERC20Service(provider, account, pool.weiToken);
+    //     setTxModalData(true, "Loading ...");
 
-        const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
-          account || "",
-          poolContractAddress,
-          state.amount
-        );
+    //     const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
+    //       account || "",
+    //       poolContractAddress,
+    //       state.amount
+    //     );
 
-        if (!hasEnoughAllowance) {
-          setTxModalData(
-            true,
-            "Approving tokens ...",
-            "Follow wallet instructions"
-          );
-          const txHash = await erc20Service.approveUnlimited(
-            poolContractAddress
-          );
-          setTxModalData(
-            true,
-            "Approving tokens ...",
-            "Please wait until the transaction is confirmed!",
-            txHash
-          );
-          await provider.waitForTransaction(txHash);
-        }
-        setTxModalData(true, "Investing ...", "Follow wallet instructions");
-        const txHash = await poolzService.investERC20(poolId, state.amount);
-        setTxModalData(
-          true,
-          "Investing ...",
-          "Please wait until the transaction is confirmed!",
-          txHash
-        );
-        await provider.waitForTransaction(txHash);
-        setTxModalData(true, "Reloading ...");
-        await reloadPoolInfo();
-        setTxModalData(false);
-      }
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar((error || { message: "Something went wrong" }).message, {
-        variant: "error",
-      });
-      setTxModalData(false);
-    }
+    //     if (!hasEnoughAllowance) {
+    //       setTxModalData(
+    //         true,
+    //         "Approving tokens ...",
+    //         "Follow wallet instructions"
+    //       );
+    //       const txHash = await erc20Service.approveUnlimited(
+    //         poolContractAddress
+    //       );
+    //       setTxModalData(
+    //         true,
+    //         "Approving tokens ...",
+    //         "Please wait until the transaction is confirmed!",
+    //         txHash
+    //       );
+    //       await provider.waitForTransaction(txHash);
+    //     }
+    //     setTxModalData(true, "Investing ...", "Follow wallet instructions");
+    //     const txHash = await poolzService.investERC20(poolId, state.amount);
+    //     setTxModalData(
+    //       true,
+    //       "Investing ...",
+    //       "Please wait until the transaction is confirmed!",
+    //       txHash
+    //     );
+    //     await provider.waitForTransaction(txHash);
+    //     setTxModalData(true, "Reloading ...");
+    //     await reloadPoolInfo();
+    //     setTxModalData(false);
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    //   enqueueSnackbar((error || { message: "Something went wrong" }).message, {
+    //     variant: "error",
+    //   });
+    //   setTxModalData(false);
+    // }
   };
+
+  const isLive = true;
 
   return (
     <div className={clsx(classes.root, props.className)}>
@@ -282,7 +275,7 @@ export const HeroSection = (props: IProps) => {
             <Timer
               className={classes.time}
               onFinished={onFinished}
-              toTimestamp={finishTime}
+              toTimestamp={endTime}
             />
           </div>
         </div>

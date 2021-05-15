@@ -153,7 +153,7 @@ export const AccountInfoBar = (props: IProps) => {
               formatBigNumber(ethBalance, DEFAULT_DECIMALS, 3),
               3
             )}{" "}
-            AVAX
+            MATIC
           </div>
           <div className={classes.address}>{shortenAddress(account || "")}</div>
         </div>
@@ -191,7 +191,7 @@ export const AccountInfoBar = (props: IProps) => {
                 formatBigNumber(ethBalance, DEFAULT_DECIMALS, 3),
                 3
               )}{" "}
-              AVAX
+              MATIC
             </div>
           </div>
           <div className={classes.row}>

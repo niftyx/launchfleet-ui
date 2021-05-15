@@ -6,7 +6,7 @@ import {
 } from "config/constants";
 import { getContractAddress } from "config/networks";
 import { useEffect, useState } from "react";
-import { PoolzService } from "services/poolz";
+import { PoolFactoryService } from "services/poolFactory";
 import { waitSeconds } from "utils";
 import { ZERO_NUMBER } from "utils/number";
 
@@ -23,27 +23,27 @@ export const usePoolsCount = (provider: any, networkId?: number): IState => {
 
   useEffect(() => {
     let isMounted = true;
-    const poolzAddress = getContractAddress(
+    const factoryAddress = getContractAddress(
       networkId || DEFAULT_NETWORK_ID,
-      "poolz"
+      "factory"
     );
-    const poolzService = new PoolzService(
+    const factoryService = new PoolFactoryService(
       provider || DEFAULT_READONLY_PROVIDER,
       "",
-      poolzAddress
+      factoryAddress
     );
     const loadPoolsCount = async () => {
-      while (isMounted) {
-        setState((prev) => ({ ...prev, loading: true }));
-        try {
-          const poolsCount = await poolzService.getPoolsCount();
-          if (isMounted)
-            setState((prev) => ({ ...prev, loading: false, poolsCount }));
-        } catch (error) {
-          if (isMounted) setState((prev) => ({ ...prev, loading: false }));
-        }
-        await waitSeconds(DEFAULT_INTERVAL);
-      }
+      // while (isMounted) {
+      //   setState((prev) => ({ ...prev, loading: true }));
+      //   try {
+      //     const poolsCount = await poolzService.getPoolsCount();
+      //     if (isMounted)
+      //       setState((prev) => ({ ...prev, loading: false, poolsCount }));
+      //   } catch (error) {
+      //     if (isMounted) setState((prev) => ({ ...prev, loading: false }));
+      //   }
+      //   await waitSeconds(DEFAULT_INTERVAL);
+      // }
     };
     loadPoolsCount();
 

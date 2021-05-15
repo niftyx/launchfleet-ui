@@ -54,7 +54,7 @@ export const ConfirmSection = (props: IProps) => {
   const isConnected = !!account;
   const toToken = getTokenFromAddress(
     networkId || DEFAULT_NETWORK_ID,
-    basePool.mainCoin
+    basePool.weiToken
   );
 
   return (
@@ -103,13 +103,13 @@ export const ConfirmSection = (props: IProps) => {
           <Typography className={classes.sectionTitle}>Swap Rules</Typography>
         </Grid>
         <Grid item sm={6} xs={12}>
-          <div className={classes.sectionRow}>
+          {/* <div className={classes.sectionRow}>
             <Typography className={classes.sectionRowComment}>
               Swap ratio
             </Typography>
             <Typography className={classes.sectionRowValue}>
               1{toToken.symbol.toUpperCase()} ={" "}
-              {formatBigNumber(basePool.expectedRate, DEFAULT_DECIMALS, 0)}{" "}
+              {formatBigNumber(basePool.multiplier, DEFAULT_DECIMALS, 0)}{" "}
               {basePool.tokenSymbol.toUpperCase()}
             </Typography>
           </div>
@@ -118,9 +118,9 @@ export const ConfirmSection = (props: IProps) => {
               Amount of tokens to lock
             </Typography>
             <Typography className={classes.sectionRowValue}>
-              {formatBigNumber(basePool.startAmount, DEFAULT_DECIMALS, 0)}
+              {formatBigNumber(basePool.tokenTarget, DEFAULT_DECIMALS, 0)}
             </Typography>
-          </div>
+          </div> */}
         </Grid>
         <Grid item sm={6} xs={12}>
           <div className={classes.sectionRow}>
@@ -128,29 +128,19 @@ export const ConfirmSection = (props: IProps) => {
               Pool running time
             </Typography>
             <Typography className={clsx(classes.sectionRowValue, "long")}>
-              {moment(
-                basePool.auctionFinishTimestamp.toNumber() * 1000
-              ).toLocaleString()}
+              {moment(basePool.startTime.toNumber() * 1000).toLocaleString()}
             </Typography>
           </div>
           <div className={classes.sectionRow}>
             <Typography className={classes.sectionRowComment}>
               Different swap ratio for poolz holders
             </Typography>
-            <Typography className={classes.sectionRowValue}>
-              {basePool.pozRate.eq(basePool.expectedRate) ? "No, " : "Yes, "}1
+            {/* <Typography className={classes.sectionRowValue}>
+              {basePool.pozRate.eq(basePool.multiplier) ? "No, " : "Yes, "}1
               {toToken.symbol.toUpperCase()} ={" "}
               {formatBigNumber(basePool.pozRate, DEFAULT_DECIMALS, 0)}{" "}
               {basePool.tokenSymbol.toUpperCase()}
-            </Typography>
-          </div>
-          <div className={classes.sectionRow}>
-            <Typography className={classes.sectionRowComment}>
-              Lock-in period
-            </Typography>
-            <Typography className={classes.sectionRowValue}>
-              {basePool.lockedUntil === 0 ? "DSP" : "TLP"}
-            </Typography>
+            </Typography> */}
           </div>
         </Grid>
         <Grid item xs={12}>

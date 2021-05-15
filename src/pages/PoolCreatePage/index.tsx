@@ -1,23 +1,27 @@
-import { BigNumber } from "@ethersproject/bignumber";
 import { Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { DEFAULT_NETWORK_ID } from "config/constants";
+import {
+  DEFAULT_MAX_WEI,
+  DEFAULT_MIN_WEI,
+  DEFAULT_NETWORK_ID,
+} from "config/constants";
 import { getContractAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
 import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useState } from "react";
 import { ERC20Service } from "services/erc20";
-import { PoolzService } from "services/poolz";
+import { PoolFactoryService } from "services/poolFactory";
 import useCommonStyles from "styles/common";
 import { IBasePool } from "types";
-import { ECreatePoolStep } from "utils/enums";
-import { ETH_NUMBER, MAX_NUMBER, ZERO_NUMBER } from "utils/number";
-import { ZERO_ADDRESS } from "utils/token";
+import { ECreatePoolStep, EPoolType } from "utils/enums";
+import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
+import { NULL_ADDRESS } from "utils/token";
 
 import {
   ConfirmSection,
   HeaderSection,
+  MetaInfoForm,
   SuccessSection,
   SwapRulesForm,
   TokenInformationForm,
@@ -43,16 +47,19 @@ const basePool: IBasePool = {
   tokenName: "",
   tokenDecimals: 0,
   tokenSymbol: "",
-  auctionFinishTimestamp: ZERO_NUMBER,
-  auctionStartTimestamp: ZERO_NUMBER,
-  expectedRate: ZERO_NUMBER,
-  pozRate: ZERO_NUMBER,
-  startAmount: ZERO_NUMBER,
-  lockedUntil: 0,
-  mainCoin: ZERO_ADDRESS,
-  is21Decimal: false,
-  now: ZERO_NUMBER,
-  whitelistId: ZERO_NUMBER,
+  tokenTarget: ZERO_NUMBER,
+  multiplier: ZERO_NUMBER,
+  weiToken: NULL_ADDRESS,
+  minWei: DEFAULT_MIN_WEI,
+  maxWei: DEFAULT_MAX_WEI,
+  poolType: EPoolType.Private,
+  endTime: ZERO_NUMBER,
+  startTime: ZERO_NUMBER,
+  claimTime: ZERO_NUMBER,
+  meta: "",
+  logo: "",
+  name: "",
+  description: "",
 };
 
 interface IProps {
@@ -62,7 +69,7 @@ interface IProps {
 interface IState {
   step: ECreatePoolStep;
   basePool: IBasePool;
-  poolId: BigNumber;
+  poolId: string;
 }
 
 const PoolCreatePage = (props: IProps) => {
@@ -78,7 +85,7 @@ const PoolCreatePage = (props: IProps) => {
   const [state, setState] = useState<IState>({
     step: ECreatePoolStep.TokenInformation,
     basePool,
-    poolId: MAX_NUMBER,
+    poolId: "",
   });
   const { enqueueSnackbar } = useSnackbar();
 
@@ -93,14 +100,14 @@ const PoolCreatePage = (props: IProps) => {
     }
     try {
       const { basePool } = state;
-      const poolContractAddress = getContractAddress(
+      const factoryAddress = getContractAddress(
         networkId || DEFAULT_NETWORK_ID,
-        "poolz"
+        "factory"
       );
-      const poolService = new PoolzService(
+      const factoryService = new PoolFactoryService(
         provider,
-        account,
-        poolContractAddress
+        "",
+        factoryAddress
       );
       const erc20Service = new ERC20Service(provider, account, basePool.token);
 
@@ -108,7 +115,7 @@ const PoolCreatePage = (props: IProps) => {
 
       const hasEnoughFund = await erc20Service.hasEnoughBalanceToFund(
         account || "",
-        basePool.startAmount
+        basePool.tokenTarget
       );
 
       if (!hasEnoughFund) {
@@ -121,8 +128,8 @@ const PoolCreatePage = (props: IProps) => {
 
       const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
         account || "",
-        poolContractAddress,
-        basePool.startAmount
+        factoryAddress,
+        basePool.tokenTarget
       );
 
       if (!hasEnoughAllowance) {
@@ -131,7 +138,7 @@ const PoolCreatePage = (props: IProps) => {
           "Approving tokens ...",
           "Follow wallet instructions"
         );
-        const txHash = await erc20Service.approveUnlimited(poolContractAddress);
+        const txHash = await erc20Service.approveUnlimited(factoryAddress);
         setTxModalData(
           true,
           "Approving tokens ...",
@@ -141,17 +148,18 @@ const PoolCreatePage = (props: IProps) => {
         await provider.waitForTransaction(txHash);
       }
       setTxModalData(true, "Creating pool ...", "Follow wallet instructions");
-      const txHash = await poolService.createPool(
+      const txHash = await factoryService.createPool(
         basePool.token,
-        basePool.auctionFinishTimestamp,
-        basePool.expectedRate.div(ETH_NUMBER),
-        basePool.pozRate.div(ETH_NUMBER),
-        basePool.startAmount,
-        basePool.mainCoin,
-        ZERO_NUMBER,
-        false,
-        basePool.auctionStartTimestamp,
-        basePool.whitelistId
+        basePool.tokenTarget,
+        basePool.multiplier.div(ETH_NUMBER),
+        basePool.weiToken,
+        basePool.minWei,
+        basePool.maxWei,
+        basePool.poolType,
+        basePool.startTime,
+        basePool.endTime,
+        basePool.claimTime,
+        basePool.meta
       );
       setTxModalData(
         true,
@@ -161,7 +169,7 @@ const PoolCreatePage = (props: IProps) => {
       );
       await provider.waitForTransaction(txHash);
 
-      const poolId = await poolService.getCreatedPoolInfo(txHash);
+      const poolId = await factoryService.getCreatedPoolId(txHash);
       setState((prev) => ({
         ...prev,
         poolId,
@@ -202,6 +210,18 @@ const PoolCreatePage = (props: IProps) => {
             )}
             {state.step === ECreatePoolStep.SwapRules && (
               <SwapRulesForm
+                basePool={state.basePool}
+                onNext={(data) => {
+                  setState((prev) => ({
+                    ...prev,
+                    basePool: { ...prev.basePool, ...data } as IBasePool,
+                    step: ECreatePoolStep.MetaInfo,
+                  }));
+                }}
+              />
+            )}
+            {state.step === ECreatePoolStep.MetaInfo && (
+              <MetaInfoForm
                 basePool={state.basePool}
                 onNext={(data) => {
                   setState((prev) => ({
