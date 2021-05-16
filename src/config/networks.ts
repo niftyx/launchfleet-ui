@@ -19,7 +19,7 @@ const networks: { [K in NetworkId]: INetwork } = {
     label: "Mumbai Testnet",
     url: "https://rpc-mumbai.maticvigil.com/",
     contracts: {
-      factory: "0xbbc9246EDB0f5942C847bD5eE728d5325063F310",
+      factory: "0x2E3740F7d7D15C66bC2410F6b41B14277a111932",
     },
     etherscanUri: "https://mumbai-explorer.matic.today/",
     thegraph: {
@@ -72,7 +72,7 @@ export const knownTokens: { [name in KnownToken]: IKnownTokenData } = {
       "https://raw.githubusercontent.com/sushiswap/assets/master/blockchains/polygon/assets/0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270/logo.png",
     addresses: {
       [networkIds.MUMBAI]: "0x8377da69E99e6DB975fCa7677C2f07C5792a4acc",
-      [networkIds.MATIC]: "0x8377da69E99e6DB975fCa7677C2f07C5792a4acc",
+      [networkIds.MATIC]: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
     },
     coingeckoTokenId: "wmatic",
   },

@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
         borderTop: `1px solid ${theme.colors.seventh}`,
       },
     },
+    "&.disabled": {
+      cursor: "default",
+    },
   },
   name: {
     whiteSpace: "nowrap",
@@ -51,12 +54,13 @@ const useStyles = makeStyles((theme) => ({
 interface IProps {
   className?: string;
   poolType: EPoolType;
-  onChange: (_: EPoolType) => void;
+  onChange?: (_: EPoolType) => void;
+  disabled?: boolean;
 }
 
 export const PoolTypeSelect = (props: IProps) => {
   const classes = useStyles();
-  const { onChange, poolType } = props;
+  const { disabled = false, onChange = () => {}, poolType } = props;
   const {
     data: {
       baseTokenInfo: { amount },
@@ -91,7 +95,11 @@ export const PoolTypeSelect = (props: IProps) => {
           const info = TYPE_INFO[index];
           return (
             <div
-              className={clsx(classes.item, type === poolType ? "active" : "")}
+              className={clsx(
+                classes.item,
+                type === poolType ? "active" : "",
+                disabled ? "disabled" : ""
+              )}
               key={type}
               onClick={() => onChange(type as EPoolType)}
             >

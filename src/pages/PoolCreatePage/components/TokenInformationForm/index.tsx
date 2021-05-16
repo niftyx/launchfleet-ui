@@ -156,6 +156,7 @@ export const TokenInformationForm = (props: IProps) => {
                   placeholder: "",
                   value: values.tokenName,
                   required: true,
+                  disabled: true,
                   disableUnderline: true,
                 }}
                 helperText={touched.tokenName && errors.tokenName}

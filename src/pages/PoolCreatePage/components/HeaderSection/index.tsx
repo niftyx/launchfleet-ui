@@ -1,4 +1,4 @@
-import { Typography, makeStyles } from "@material-ui/core";
+import { Hidden, Typography, makeStyles } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import clsx from "clsx";
@@ -89,38 +89,42 @@ export const HeaderSection = (props: IProps) => {
   return (
     <div className={clsx(classes.root, props.className)}>
       <div className={classes.left}>
-        <div className={clsx(classes.leftWrapper, commonClasses.hideOnPad)}>
-          {stepValues.map((stepValue, index) => {
-            if (index > stepIndex) return null;
-            if (index === 0) {
+        <Hidden smDown>
+          <div className={clsx(classes.leftWrapper)}>
+            {stepValues.map((stepValue, index) => {
+              if (index > stepIndex) return null;
+              if (index === 0) {
+                return (
+                  <Typography className={classes.leftItem} key={stepValue}>
+                    {stepValue}
+                  </Typography>
+                );
+              }
               return (
-                <Typography className={classes.leftItem} key={stepValue}>
-                  {stepValue}
-                </Typography>
+                <div className={classes.leftItem} key={stepValue}>
+                  <ChevronRightIcon
+                    className={classes.leftIcon}
+                    onClick={() => setStep(stepValues[stepIndex - 1])}
+                  />
+                  <Typography className={classes.leftItem}>
+                    {stepValue}
+                  </Typography>
+                </div>
               );
-            }
-            return (
-              <div className={classes.leftItem} key={stepValue}>
-                <ChevronRightIcon
-                  className={classes.leftIcon}
-                  onClick={() => setStep(stepValues[stepIndex - 1])}
-                />
-                <Typography className={classes.leftItem}>
-                  {stepValue}
-                </Typography>
-              </div>
-            );
-          })}
-        </div>
-        <div className={clsx(classes.leftWrapper, commonClasses.hideUpPad)}>
-          {stepIndex > 0 && (
-            <ChevronLeftIcon
-              className={classes.leftIcon}
-              onClick={() => setStep(stepValues[stepIndex - 1])}
-            />
-          )}
-          <Typography>{step}</Typography>
-        </div>
+            })}
+          </div>
+        </Hidden>
+        <Hidden mdUp>
+          <div className={clsx(classes.leftWrapper, commonClasses.hideUpPad)}>
+            {stepIndex > 0 && (
+              <ChevronLeftIcon
+                className={classes.leftIcon}
+                onClick={() => setStep(stepValues[stepIndex - 1])}
+              />
+            )}
+            <Typography>{step}</Typography>
+          </div>
+        </Hidden>
       </div>
       <div className={classes.progressWrapper}>
         <div className={classes.progressbar}>

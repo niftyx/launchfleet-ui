@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    border: `2px solid ${theme.colors.default}`,
+    border: `2px solid ${theme.colors.third}`,
     backgroundColor: theme.colors.primary,
   },
   selectorButton: {

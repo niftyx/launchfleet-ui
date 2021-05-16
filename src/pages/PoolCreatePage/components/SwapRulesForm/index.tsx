@@ -136,6 +136,10 @@ export const SwapRulesForm = (props: IProps) => {
             setFieldError("tokenTarget", "StartAmount can't be zero.");
             return;
           }
+          if (values.tokenTarget.gt(state.balance)) {
+            setFieldError("tokenTarget", "Insufficient fund!");
+            return;
+          }
           if (values.multiplier.eq(ZERO_NUMBER)) {
             setFieldError("multiplier", "ExpectedRate can't be zero.");
             return;

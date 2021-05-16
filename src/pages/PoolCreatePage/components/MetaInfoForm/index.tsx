@@ -77,10 +77,23 @@ export const MetaInfoForm = (props: IProps) => {
     return (
       <Formik
         initialValues={initialFormValues}
-        onSubmit={(values, { setFieldError }) => {
+        onSubmit={async (values, { setSubmitting }) => {
           const payloadValues = { ...values };
 
-          onNext(payloadValues);
+          setSubmitting(true);
+
+          try {
+            const meta = await ipfsService.uploadData({
+              name: values.name,
+              description: values.description,
+              logo: values.logo,
+            });
+            setSubmitting(false);
+            onNext({ ...payloadValues, meta });
+          } catch (error) {
+            setSubmitting(false);
+            onNext(payloadValues);
+          }
         }}
         validationSchema={Yup.object().shape({
           logo: Yup.string().required(),
@@ -93,6 +106,7 @@ export const MetaInfoForm = (props: IProps) => {
           handleBlur,
           handleChange,
           handleSubmit,
+          isSubmitting,
           isValid,
           setFieldValue,
           touched,
@@ -138,7 +152,7 @@ export const MetaInfoForm = (props: IProps) => {
                   loading={state.logoUploading}
                 />
               </Grid>
-              <Grid item sm={6} xs={12}>
+              <Grid item xs={12}>
                 <FormTextField
                   FormControlProps={{ fullWidth: true }}
                   FormHelperTextProps={{
@@ -193,7 +207,7 @@ export const MetaInfoForm = (props: IProps) => {
                   className={classes.submit}
                   classes={{ disabled: classes.submitDisabled }}
                   color="primary"
-                  disabled={!isValid}
+                  disabled={!isValid || isSubmitting}
                   fullWidth
                   type="submit"
                   variant="contained"

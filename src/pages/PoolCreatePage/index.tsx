@@ -106,7 +106,7 @@ const PoolCreatePage = (props: IProps) => {
       );
       const factoryService = new PoolFactoryService(
         provider,
-        "",
+        account,
         factoryAddress
       );
       const erc20Service = new ERC20Service(provider, account, basePool.token);

@@ -1,5 +1,12 @@
-import { Button, Grid, Typography, makeStyles } from "@material-ui/core";
+import {
+  Avatar,
+  Button,
+  Grid,
+  Typography,
+  makeStyles,
+} from "@material-ui/core";
 import clsx from "clsx";
+import { PoolTypeSelect } from "components";
 import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
 import { getTokenFromAddress } from "config/networks";
 import { useConnectedWeb3Context } from "contexts";
@@ -25,6 +32,10 @@ const useStyles = makeStyles((theme) => ({
       borderTop: `1px solid ${transparentize(0.9, theme.colors.eighth)}`,
       paddingTop: 12,
     },
+    "&.link": {
+      justifyContent: "flex-start",
+      paddingBottom: 0,
+    },
   },
   sectionRowComment: {
     color: theme.colors.third,
@@ -38,6 +49,13 @@ const useStyles = makeStyles((theme) => ({
     "&.long": {
       wordBreak: "break-all",
     },
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    borderRadius: "50%",
+    border: `1px solid ${theme.colors.third}`,
+    backgroundColor: theme.colors.primary,
   },
 }));
 
@@ -60,6 +78,32 @@ export const ConfirmSection = (props: IProps) => {
   return (
     <div className={clsx(classes.root, props.className)}>
       <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography className={classes.sectionTitle}>
+            Pool Information
+          </Typography>
+        </Grid>
+        <Grid item sm={6} xs={12}>
+          <Avatar className={classes.logo} src={basePool.logo} />
+          <br />
+
+          <div className={clsx(classes.sectionRow, "link")}>
+            <Typography className={classes.sectionRowComment}>Name:</Typography>
+            <Typography className={classes.sectionRowValue}>
+              {basePool.name}
+            </Typography>
+          </div>
+        </Grid>
+        <Grid item xs={12}>
+          <div className={clsx(classes.sectionRow, "link")}>
+            <Typography className={classes.sectionRowComment}>
+              Description:
+            </Typography>
+            <Typography className={clsx(classes.sectionRowValue, "long")}>
+              {basePool.description}
+            </Typography>
+          </div>
+        </Grid>
         <Grid item xs={12}>
           <Typography className={classes.sectionTitle}>
             Token Information
@@ -103,7 +147,7 @@ export const ConfirmSection = (props: IProps) => {
           <Typography className={classes.sectionTitle}>Swap Rules</Typography>
         </Grid>
         <Grid item sm={6} xs={12}>
-          {/* <div className={classes.sectionRow}>
+          <div className={classes.sectionRow}>
             <Typography className={classes.sectionRowComment}>
               Swap ratio
             </Typography>
@@ -120,12 +164,30 @@ export const ConfirmSection = (props: IProps) => {
             <Typography className={classes.sectionRowValue}>
               {formatBigNumber(basePool.tokenTarget, DEFAULT_DECIMALS, 0)}
             </Typography>
-          </div> */}
+          </div>
+          <div className={classes.sectionRow}>
+            <Typography className={classes.sectionRowComment}>
+              Min Allocation Per Wallet
+            </Typography>
+            <Typography className={classes.sectionRowValue}>
+              {formatBigNumber(basePool.minWei, DEFAULT_DECIMALS)}{" "}
+              {toToken.symbol.toUpperCase()}
+            </Typography>
+          </div>
+          <div className={classes.sectionRow}>
+            <Typography className={classes.sectionRowComment}>
+              Max Allocation Per Wallet
+            </Typography>
+            <Typography className={classes.sectionRowValue}>
+              {formatBigNumber(basePool.maxWei, DEFAULT_DECIMALS)}{" "}
+              {toToken.symbol.toUpperCase()}
+            </Typography>
+          </div>
         </Grid>
         <Grid item sm={6} xs={12}>
           <div className={classes.sectionRow}>
             <Typography className={classes.sectionRowComment}>
-              Pool running time
+              Pool start time
             </Typography>
             <Typography className={clsx(classes.sectionRowValue, "long")}>
               {moment(basePool.startTime.toNumber() * 1000).toLocaleString()}
@@ -133,15 +195,23 @@ export const ConfirmSection = (props: IProps) => {
           </div>
           <div className={classes.sectionRow}>
             <Typography className={classes.sectionRowComment}>
-              Different swap ratio for poolz holders
+              Pool end time
             </Typography>
-            {/* <Typography className={classes.sectionRowValue}>
-              {basePool.pozRate.eq(basePool.multiplier) ? "No, " : "Yes, "}1
-              {toToken.symbol.toUpperCase()} ={" "}
-              {formatBigNumber(basePool.pozRate, DEFAULT_DECIMALS, 0)}{" "}
-              {basePool.tokenSymbol.toUpperCase()}
-            </Typography> */}
+            <Typography className={clsx(classes.sectionRowValue, "long")}>
+              {moment(basePool.endTime.toNumber() * 1000).toLocaleString()}
+            </Typography>
           </div>
+          <div className={classes.sectionRow}>
+            <Typography className={classes.sectionRowComment}>
+              Pool claim time
+            </Typography>
+            <Typography className={clsx(classes.sectionRowValue, "long")}>
+              {moment(basePool.claimTime.toNumber() * 1000).toLocaleString()}
+            </Typography>
+          </div>
+        </Grid>
+        <Grid item xs={12}>
+          <PoolTypeSelect disabled poolType={basePool.poolType} />
         </Grid>
         <Grid item xs={12}>
           <Button
