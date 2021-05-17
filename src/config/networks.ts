@@ -25,8 +25,8 @@ const networks: { [K in NetworkId]: INetwork } = {
     },
     etherscanUri: "https://mumbai-explorer.matic.today/",
     thegraph: {
-      httpUri: "https://api.thegraph.com/subgraphs/name/altbee/launch-test",
-      wsUri: "wss://api.thegraph.com/subgraphs/name/altbee/launch-test",
+      httpUri: "https://thegraph.com/explorer/subgraph/niftyx/launchfleet-dev",
+      wsUri: "wss://thegraph.com/explorer/subgraph/niftyx/launchfleet-dev",
     },
   },
   [networkIds.MATIC]: {
@@ -37,8 +37,8 @@ const networks: { [K in NetworkId]: INetwork } = {
     },
     etherscanUri: "https://explorer.matic.network/",
     thegraph: {
-      httpUri: "https://api.thegraph.com/subgraphs/name/altbee/launch-test",
-      wsUri: "wss://api.thegraph.com/subgraphs/name/altbee/launch-test",
+      httpUri: "https://thegraph.com/explorer/subgraph/niftyx/launchfleet-dev",
+      wsUri: "wss://thegraph.com/explorer/subgraph/niftyx/launchfleet-dev",
     },
   },
 };
