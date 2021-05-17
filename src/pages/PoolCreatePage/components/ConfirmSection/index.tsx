@@ -152,8 +152,8 @@ export const ConfirmSection = (props: IProps) => {
               Swap ratio
             </Typography>
             <Typography className={classes.sectionRowValue}>
-              1{toToken.symbol.toUpperCase()} ={" "}
-              {formatBigNumber(basePool.multiplier, DEFAULT_DECIMALS, 0)}{" "}
+              1{toToken.symbol.toUpperCase()} =&nbsp;
+              {formatBigNumber(basePool.multiplier, DEFAULT_DECIMALS, 0)}&nbsp;
               {basePool.tokenSymbol.toUpperCase()}
             </Typography>
           </div>
@@ -170,7 +170,7 @@ export const ConfirmSection = (props: IProps) => {
               Min Allocation Per Wallet
             </Typography>
             <Typography className={classes.sectionRowValue}>
-              {formatBigNumber(basePool.minWei, DEFAULT_DECIMALS)}{" "}
+              {formatBigNumber(basePool.minWei, DEFAULT_DECIMALS)}&nbsp;
               {toToken.symbol.toUpperCase()}
             </Typography>
           </div>
@@ -179,7 +179,7 @@ export const ConfirmSection = (props: IProps) => {
               Max Allocation Per Wallet
             </Typography>
             <Typography className={classes.sectionRowValue}>
-              {formatBigNumber(basePool.maxWei, DEFAULT_DECIMALS)}{" "}
+              {formatBigNumber(basePool.maxWei, DEFAULT_DECIMALS)}&nbsp;
               {toToken.symbol.toUpperCase()}
             </Typography>
           </div>

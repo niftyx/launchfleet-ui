@@ -2,6 +2,7 @@ import { makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import React from "react";
 import { IPool } from "types";
+import { EPoolStatus } from "utils/enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,8 +21,16 @@ const useStyles = makeStyles((theme) => ({
     width: 7,
     height: 7,
     borderRadius: "50%",
-
-    backgroundColor: theme.colors.fourth,
+    backgroundColor: theme.colors.primary,
+    "&.active": {
+      backgroundColor: theme.colors.fourth,
+    },
+    "&.finished": {
+      backgroundColor: theme.colors.seventh,
+    },
+    "&.claimable": {
+      backgroundColor: theme.colors.fifteen,
+    },
   },
 }));
 
@@ -32,14 +41,24 @@ interface IProps {
 
 export const PoolStatusTag = (props: IProps) => {
   const classes = useStyles();
-  // const {
-  //   pool: { poolStatus: status },
-  // } = props;
+  const {
+    pool: { claimTime, endTime, startTime },
+  } = props;
 
+  const timestamp = Math.ceil(Date.now() / 1000);
+  let status = EPoolStatus.Created;
+
+  if (timestamp > startTime.toNumber()) {
+    status = EPoolStatus.Active;
+  } else if (timestamp > endTime.toNumber()) {
+    status = EPoolStatus.Finished;
+  } else if (timestamp > claimTime.toNumber()) {
+    status = EPoolStatus.Claimable;
+  }
   return (
     <div className={clsx(classes.root, props.className)}>
-      <span className={clsx(classes.tag)}></span>
-      {/* <span className={classes.label}>{status}</span> */}
+      <span className={clsx(classes.tag, status.toLowerCase())}></span>
+      <span className={classes.label}>{status}</span>
     </div>
   );
 };

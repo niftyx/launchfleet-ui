@@ -5,11 +5,17 @@ import { getLogger } from "utils/logger";
 const logger = getLogger("Services::Erc20");
 
 const poolAbi = [
-  "function poolsCount() external view returns (uint256)",
-  "function pools(uint256) external view returns (address)",
-  "function getFeeInfo() external view returns (address, uint256)",
-  "function getBaseInfo() external view returns (address, uint256)",
-  "function createPool(address token,uint256 tokenTarget,uint256 multiplier,address weiToken,uint256 minWei,uint256 maxWei,uint8 poolType,uint256 startTime,uint256 endTime,uint256 claimTime,string memory meta) external returns (address)",
+  "function claimableAmount(address user) external view returns (uint256)",
+  "function setMeta(string memory _meta) external",
+  "function withdrawToken() external",
+  "function withdrawWei(uint256 amount) public payable",
+  "function withdrawWeiToken(uint256 amount) external",
+  "function claim() external",
+  "function buyWithEth() public payable",
+  "function buy(uint256 weiAmount) public",
+  "function addMultipleWhitelistedAddresses(address[] calldata _addresses) external",
+  "function removeWhitelistedAddress(address _address) external",
+  "function addWhitelistedAddress(address _address) external",
 ];
 
 class PoolService {
@@ -38,54 +44,104 @@ class PoolService {
     return this.contract.address;
   }
 
-  getPoolCount = async (): Promise<BigNumber> => {
-    return this.contract.poolsCount();
+  getClaimableAmount = async (address: string): Promise<BigNumber> => {
+    return this.contract.claimableAmount(address);
   };
 
-  getPool = async (index: BigNumber): Promise<string> => {
-    return this.contract.pools(index);
+  setMeta = async (meta: string): Promise<string> => {
+    const transactionObject = await this.contract.setMeta(meta, {
+      value: "0x0",
+    });
+    logger.log(`setMeta transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
   };
 
-  getFeeInfo = async (): Promise<{ address: string; percent: BigNumber }> => {
-    const res = this.contract.getFeeInfo();
-    return { address: res[0], percent: res[1] };
+  claim = async (): Promise<string> => {
+    const transactionObject = await this.contract.claim({
+      value: "0x0",
+    });
+    logger.log(`claim transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
   };
 
-  getBaseInfo = async (): Promise<{ address: string; amount: BigNumber }> => {
-    const res = this.contract.getBaseInfo();
-    return { address: res[0], amount: res[1] };
+  withdrawToken = async (): Promise<string> => {
+    const transactionObject = await this.contract.withdrawToken({
+      value: "0x0",
+    });
+    logger.log(`withdrawToken transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
   };
 
-  createPool = async (
-    token: string,
-    tokenTarget: BigNumber,
-    multiplier: BigNumber,
-    weiToken: string,
-    minWei: BigNumber,
-    maxWei: BigNumber,
-    poolType: number,
-    startTime: BigNumber,
-    endTime: BigNumber,
-    claimTime: BigNumber,
-    meta: string
-  ): Promise<string> => {
-    const transactionObject = await this.contract.createPool(
-      token,
-      tokenTarget,
-      multiplier,
-      weiToken,
-      minWei,
-      maxWei,
-      poolType,
-      startTime,
-      endTime,
-      claimTime,
-      meta,
+  withdrawWei = async (amount: BigNumber): Promise<string> => {
+    const transactionObject = await this.contract.withdrawWei(amount, {
+      value: "0x0",
+    });
+    logger.log(`withdrawWei transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
+  };
+
+  withdrawWeiToken = async (amount: BigNumber): Promise<string> => {
+    const transactionObject = await this.contract.withdrawWeiToken(amount, {
+      value: "0x0",
+    });
+    logger.log(`withdrawWeiToken transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
+  };
+
+  buyWithEth = async (amount: BigNumber): Promise<string> => {
+    const transactionObject = await this.contract.buyWithEth({
+      value: amount,
+    });
+    logger.log(`buyWithEth transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
+  };
+
+  buy = async (amount: BigNumber): Promise<string> => {
+    const transactionObject = await this.contract.buy(amount, {
+      value: "0x0",
+    });
+    logger.log(`buy transaction hash: ${transactionObject.hash}`);
+    return transactionObject.hash;
+  };
+
+  addWhitelistedAddress = async (address: string): Promise<string> => {
+    const transactionObject = await this.contract.addWhitelistedAddress(
+      address,
       {
         value: "0x0",
       }
     );
-    logger.log(`CreatePool transaction hash: ${transactionObject.hash}`);
+    logger.log(
+      `addWhitelistedAddress transaction hash: ${transactionObject.hash}`
+    );
+    return transactionObject.hash;
+  };
+
+  addMultipleWhitelistedAddresses = async (
+    addresses: string[]
+  ): Promise<string> => {
+    const transactionObject = await this.contract.addMultipleWhitelistedAddresses(
+      addresses,
+      {
+        value: "0x0",
+      }
+    );
+    logger.log(
+      `addMultipleWhitelistedAddresses transaction hash: ${transactionObject.hash}`
+    );
+    return transactionObject.hash;
+  };
+
+  removeWhitelistedAddress = async (address: string): Promise<string> => {
+    const transactionObject = await this.contract.removeWhitelistedAddress(
+      address,
+      {
+        value: "0x0",
+      }
+    );
+    logger.log(
+      `removeWhitelistedAddress transaction hash: ${transactionObject.hash}`
+    );
     return transactionObject.hash;
   };
 }

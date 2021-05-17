@@ -115,7 +115,7 @@ export const HeaderSection = (props: IProps) => {
           </div>
         </Hidden>
         <Hidden mdUp>
-          <div className={clsx(classes.leftWrapper, commonClasses.hideUpPad)}>
+          <div className={clsx(classes.leftWrapper)}>
             {stepIndex > 0 && (
               <ChevronLeftIcon
                 className={classes.leftIcon}

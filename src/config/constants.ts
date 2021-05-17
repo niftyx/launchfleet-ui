@@ -12,6 +12,9 @@ export const STORAGE_KEY_CONNECTOR = "CONNECTOR";
 export const LOGGER_ID = "snowstorm";
 
 export const TEST_MODE = Boolean(Number(process.env.REACT_APP_TEST || "1"));
+export const COVALENTHQ_API_KEY = String(
+  process.env.REACT_APP_COVALENTHQ_API_KEY || ""
+);
 
 export const DEFAULT_NETWORK_ID: NetworkId = TEST_MODE ? 80001 : 137;
 
@@ -22,7 +25,7 @@ export const DEFAULT_USD = 0;
 export const DEFAULT_INTERVAL = 30;
 
 export const PAGE_ITEMS = BigNumber.from(5);
-export const MIN_CALC_TOKENS = parseEther("10");
+export const ITEMS_PER_PAGE = 5;
 
 export const DEFAULT_MIN_WEI = parseEther("0.1");
 export const DEFAULT_MAX_WEI = parseEther("1");

@@ -14,7 +14,7 @@ const useCommonStyles = makeStyles((theme) => ({
   },
   scrollHorizontal: {
     "&::-webkit-scrollbar": {
-      height: theme.spacing(0.25),
+      height: theme.spacing(0.5),
       boxShadow: theme.colors.boxShadow1,
     },
     "&::-webkit-scrollbar-track": {},

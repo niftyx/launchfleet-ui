@@ -8,6 +8,12 @@ import { waitSeconds } from "utils";
 
 const useStyles = makeStyles((theme) => ({
   root: { marginTop: 24 },
+  section: {
+    backgroundColor: theme.colors.default,
+    borderRadius: 24,
+    padding: "24px 32px",
+  },
+  row: {},
 }));
 
 interface IProps {
@@ -53,7 +59,7 @@ export const YourAllocations = (props: IProps) => {
   }, [poolId]);
 
   const renderHistory = () => {
-    return <div>History</div>;
+    return <div className={classes.section}>History</div>;
   };
 
   return (

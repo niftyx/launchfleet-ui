@@ -4,6 +4,7 @@ import { ReactComponent as UsersIcon } from "assets/svgs/users.svg";
 import clsx from "clsx";
 import React from "react";
 import { IPool } from "types";
+import { getLeftTokens } from "utils/pool";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,8 +48,9 @@ interface IProps {
 export const PoolJoinedStatusTag = (props: IProps) => {
   const classes = useStyles();
   const { pool } = props;
+  const leftTokens = getLeftTokens(pool);
   const percentNumber = pool.startTime
-    //.sub(pool.leftTokens)
+    .sub(leftTokens)
     .mul(BigNumber.from(100))
     .div(pool.startTime);
   const percent = percentNumber.toNumber();

@@ -7,6 +7,7 @@ import { useGlobal } from "contexts";
 import React from "react";
 import { formatBigNumber } from "utils";
 import { EPoolType } from "utils/enums";
+import { getPoolTypeConfigTexts } from "utils/pool";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,21 +73,7 @@ export const PoolTypeSelect = (props: IProps) => {
     ? ""
     : formatBigNumber(amount, baseToken.decimals);
 
-  const TYPE_INFO = [
-    {
-      name: "Private",
-      hint:
-        "You can add wallets to whitelists and only white-listed users can participate in the pool.",
-    },
-    {
-      name: "LAUNCH Holders",
-      hint: `Users than own ${finalAmountStr} LAUNCH token can participate in the pool.`,
-    },
-    {
-      name: "Public",
-      hint: "Any users can participate in the pool.",
-    },
-  ];
+  const TYPE_INFO = getPoolTypeConfigTexts(finalAmountStr);
 
   return (
     <div className={clsx(classes.root, props.className)}>

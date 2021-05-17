@@ -52,9 +52,12 @@ class PoolFactoryService {
     return this.contract.pools(index);
   };
 
-  getFeeInfo = async (): Promise<{ address: string; percent: BigNumber }> => {
-    const res = this.contract.getFeeInfo();
-    return { address: res[0], percent: res[1] };
+  getFeeInfo = async (): Promise<{
+    feeRecipient: string;
+    feePercent: BigNumber;
+  }> => {
+    const res = await this.contract.getFeeInfo();
+    return { feeRecipient: res[0], feePercent: res[1] };
   };
 
   getBaseInfo = async (): Promise<{ address: string; amount: BigNumber }> => {

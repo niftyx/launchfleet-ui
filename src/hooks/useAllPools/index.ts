@@ -1,6 +1,5 @@
 import axios from "axios";
 import { DEFAULT_READONLY_PROVIDER, ITEMS_PER_PAGE } from "config/constants";
-import FEATURED_POOL_IDS from "config/featuredPools.json";
 import { getGraphUris } from "config/networks";
 import { useConnectedWeb3Context } from "contexts";
 import { useIsMountedRef } from "hooks/useIsMountedRef";
@@ -10,13 +9,10 @@ import { IPool } from "types";
 import { fetchQuery, wranglePool } from "utils/thegraph";
 
 const query = `
-  query GetPools($first: Int!, $skip: Int!, $creator: String!) {
+  query GetPools($first: Int!, $skip: Int!) {
     pools(
       first: $first
       skip: $skip
-      where: {
-        creator: $creator
-      }
       orderBy: createTimestamp
       orderDirection: asc
     ) {
@@ -49,7 +45,7 @@ interface IState {
   hasMore: boolean;
 }
 
-export const useMyPools = (): IState & {
+export const useAllPools = (): IState & {
   loadMorePools: () => Promise<void>;
 } => {
   const { account, library: provider, networkId } = useConnectedWeb3Context();
@@ -71,7 +67,6 @@ export const useMyPools = (): IState & {
           {
             skip: state.pools.length,
             first: ITEMS_PER_PAGE + 1,
-            creator: account || "",
           },
           httpUri
         )
@@ -135,7 +130,6 @@ export const useMyPools = (): IState & {
           {
             skip: 0,
             first: ITEMS_PER_PAGE + 1,
-            creator: account || "",
           },
           httpUri
         )

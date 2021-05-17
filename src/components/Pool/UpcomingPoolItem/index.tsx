@@ -1,15 +1,14 @@
-import { BigNumber } from "@ethersproject/bignumber";
 import { Avatar, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { SimpleLoader } from "components/Loader";
-import { PoolCloseTimeTag, PoolRaisedTag, PrivateTag } from "components/Tag";
-import { PublicTag } from "components/Tag/PublicTag";
+import { PoolRaisedTag, PoolTypeTag } from "components/Tag";
+import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
+import { getTokenFromAddress } from "config/networks";
 import { useConnectedWeb3Context } from "contexts";
-import { usePoolDetails } from "hooks";
 import { transparentize } from "polished";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { ZERO_NUMBER } from "utils/number";
+import { IPool } from "types";
+import { formatBigNumber } from "utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,52 +75,39 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  poolId: BigNumber;
+  pool: IPool;
 }
 
 export const UpcomingPoolItem = (props: IProps) => {
   const classes = useStyles();
-  const { poolId } = props;
-  const { library: provider, networkId } = useConnectedWeb3Context();
-
-  const { loading: poolLoading, pool } = usePoolDetails(
-    poolId,
-    networkId,
-    provider
+  const { pool } = props;
+  const { networkId } = useConnectedWeb3Context();
+  const weiInfo = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    pool.weiToken
   );
 
-  const endTime = pool ? pool.endTime.toNumber() : 0;
-  const startTime = pool ? pool.startTime.toNumber() : 0;
-
-  const nowTime = Math.floor(Date.now() / 1000);
-  const isClosed = nowTime - endTime > 0;
-  const isActive = nowTime < endTime && nowTime >= startTime;
-
-  // const isPrivate = pool ? !pool.whiteListId.eq(ZERO_NUMBER) : false;
-  const isPrivate = false;
-
   const renderContent = () => {
-    if (!pool) return null;
     return (
       <>
         <div className={clsx(classes.section, classes.topWrapper)}>
           <Avatar className={classes.avatar} src={pool.logo} />
-          <Typography className={classes.title}>{pool.tokenName}</Typography>
+          <Typography className={classes.title}>{pool.name}</Typography>
           <PoolRaisedTag pool={pool} />
         </div>
         <div className={classes.section}>
           <div className={classes.row}>
-            {isPrivate ? <PrivateTag /> : <PublicTag />}
-            {!isClosed && (
-              <PoolCloseTimeTag diff={endTime - nowTime} timestamp={endTime} />
-            )}
+            <PoolTypeTag poolType={pool.poolType} />
           </div>
           <div className={classes.row}>
             <Typography className={classes.allocationLabel}>
-              Min. allocation
+              Min. allocation: {formatBigNumber(pool.minWei, DEFAULT_DECIMALS)}
+              &nbsp;
+              {weiInfo.symbol}
             </Typography>
             <Typography className={classes.allocationLabel}>
-              Max. allocation
+              Max. allocation: {formatBigNumber(pool.maxWei, DEFAULT_DECIMALS)}
+              &nbsp;{weiInfo.symbol}
             </Typography>
           </div>
           <div className={classes.row}>
@@ -139,16 +125,10 @@ export const UpcomingPoolItem = (props: IProps) => {
 
   return (
     <NavLink
-      className={clsx(classes.root, props.className, isActive ? "active" : "")}
-      to={`/pool/${poolId.toHexString()}`}
+      className={clsx(classes.root, props.className)}
+      to={`/pool/${pool.id}`}
     >
-      <div className={classes.content}>
-        {poolLoading ? (
-          <SimpleLoader className={classes.spinner} />
-        ) : (
-          renderContent()
-        )}
-      </div>
+      <div className={classes.content}>{renderContent()}</div>
     </NavLink>
   );
 };

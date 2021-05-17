@@ -10,12 +10,12 @@ import { IPool } from "types";
 import { fetchQuery, wranglePool } from "utils/thegraph";
 
 const query = `
-  query GetPools($first: Int!, $skip: Int!, $creator: String!) {
+  query GetPools($first: Int!, $skip: Int!, $ids: [String!]) {
     pools(
       first: $first
       skip: $skip
       where: {
-        creator: $creator
+        id_in: $ids
       }
       orderBy: createTimestamp
       orderDirection: asc
@@ -49,7 +49,7 @@ interface IState {
   hasMore: boolean;
 }
 
-export const useMyPools = (): IState & {
+export const useFeaturedPools = (): IState & {
   loadMorePools: () => Promise<void>;
 } => {
   const { account, library: provider, networkId } = useConnectedWeb3Context();
@@ -71,7 +71,7 @@ export const useMyPools = (): IState & {
           {
             skip: state.pools.length,
             first: ITEMS_PER_PAGE + 1,
-            creator: account || "",
+            ids: FEATURED_POOL_IDS,
           },
           httpUri
         )
@@ -135,7 +135,7 @@ export const useMyPools = (): IState & {
           {
             skip: 0,
             first: ITEMS_PER_PAGE + 1,
-            creator: account || "",
+            ids: FEATURED_POOL_IDS,
           },
           httpUri
         )

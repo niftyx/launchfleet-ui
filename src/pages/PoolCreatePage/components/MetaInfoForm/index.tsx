@@ -83,11 +83,14 @@ export const MetaInfoForm = (props: IProps) => {
           setSubmitting(true);
 
           try {
-            const meta = await ipfsService.uploadData({
-              name: values.name,
-              description: values.description,
-              logo: values.logo,
-            });
+            const meta = await ipfsService.uploadData(
+              JSON.stringify({
+                name: values.name,
+                description: values.description,
+                logo: values.logo,
+              })
+            );
+
             setSubmitting(false);
             onNext({ ...payloadValues, meta });
           } catch (error) {

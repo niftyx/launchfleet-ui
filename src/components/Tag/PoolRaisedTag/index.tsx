@@ -7,6 +7,7 @@ import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, formatToShortNumber } from "utils";
 import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
+import { getLeftTokens } from "utils/pool";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -39,29 +40,30 @@ export const PoolRaisedTag = (props: IProps) => {
   const { networkId } = useConnectedWeb3Context();
   const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
-  // const isFilled = pool.leftTokens.eq(ZERO_NUMBER);
-  // const isUpcoming = startTime > nowTime;
+  const leftTokens = getLeftTokens(pool);
+  const isFilled = leftTokens.eq(ZERO_NUMBER);
+  const isUpcoming = startTime > nowTime;
 
-  // const token = getTokenFromAddress(
-  //   networkId || DEFAULT_NETWORK_ID,
-  //   pool.weiToken
-  // );
-  // const tokenPrice = (price as any)[token.symbol.toLowerCase()].price;
-  // const totalRaised = isUpcoming
-  //   ? pool.tokenTarget.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
-  //   : pool.tokenTarget
-  //       .sub(pool.leftTokens)
-  //       .mul(tokenPrice)
-  //       .div(pool.rate)
-  //       .div(ETH_NUMBER);
+  const token = getTokenFromAddress(
+    networkId || DEFAULT_NETWORK_ID,
+    pool.weiToken
+  );
+  const tokenPrice = (price as any)[token.symbol.toLowerCase()].price;
+  const totalRaised = isUpcoming
+    ? pool.tokenTarget.mul(tokenPrice).div(pool.multiplier).div(ETH_NUMBER)
+    : pool.tokenTarget
+        .sub(leftTokens)
+        .mul(tokenPrice)
+        .div(pool.multiplier)
+        .div(ETH_NUMBER);
 
-  // const totalRaisedStr = formatToShortNumber(
-  //   formatBigNumber(totalRaised, DEFAULT_DECIMALS)
-  // );
+  const totalRaisedStr = formatToShortNumber(
+    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  );
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      {/* <Typography
+      <Typography
         className={clsx(
           classes.raised,
           isFilled ? "filled" : "",
@@ -72,7 +74,7 @@ export const PoolRaisedTag = (props: IProps) => {
       </Typography>
       <Typography className={classes.raisedComment}>
         {isUpcoming ? "to be raised" : "raised"}
-      </Typography> */}
+      </Typography>
     </div>
   );
 };

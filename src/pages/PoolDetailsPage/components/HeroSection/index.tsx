@@ -2,17 +2,16 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Button, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { PoolItemDetails, PoolStatusTag, Timer, TokenInput } from "components";
-import { DEFAULT_NETWORK_ID } from "config/constants";
-import { getContractAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
+import { useIsMountedRef } from "hooks";
 import { useSnackbar } from "notistack";
 import { transparentize } from "polished";
 import React, { useEffect, useState } from "react";
 import { ERC20Service } from "services/erc20";
-import { PoolFactoryService } from "services/poolFactory";
+import { PoolService } from "services/pool";
 import { IPool } from "types";
+import { formatBigNumber } from "utils";
 import { ZERO_NUMBER } from "utils/number";
-import { getMinMaxAllocationPerWallet } from "utils/pool";
 import { NULL_ADDRESS } from "utils/token";
 
 const useStyles = makeStyles((theme) => ({
@@ -50,6 +49,13 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down(theme.custom.padWidth)]: {
       maxWidth: "none",
     },
+    "&.center-wrapper": {
+      display: "flex",
+      alignItems: "center",
+      flexDirection: "column",
+      height: "100%",
+      justifyContent: "center",
+    },
   },
   inputCommentWrapper: {
     display: "flex",
@@ -76,18 +82,18 @@ const useStyles = makeStyles((theme) => ({
 interface IProps {
   className?: string;
   pool: IPool;
-  poolId: BigNumber;
   reloadPoolInfo: () => Promise<void>;
 }
 
 interface IState {
   amount: BigNumber;
   balance: BigNumber;
+  claimableAmount: BigNumber;
 }
 
 export const HeroSection = (props: IProps) => {
   const classes = useStyles();
-  const { pool, poolId, reloadPoolInfo } = props;
+  const { pool, reloadPoolInfo } = props;
   const { setTxModalData } = useGlobal();
   const {
     account,
@@ -99,21 +105,45 @@ export const HeroSection = (props: IProps) => {
 
   const endTime = pool.endTime.toNumber();
   const startTime = pool.startTime.toNumber();
+  const claimTime = pool.claimTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
-  // const isLive = startTime <= nowTime && nowTime < endTime;
-  const isMainCoinAvax = pool.weiToken === NULL_ADDRESS;
-  // const isPrivate = !pool.whiteListId.eq(ZERO_NUMBER);
-
-  const MaxAllocationPerWallet = ZERO_NUMBER,
-    MinAllocationPerWallet = ZERO_NUMBER;
+  const isLive = startTime <= nowTime && nowTime < endTime;
+  const isFinished = nowTime >= endTime && nowTime < claimTime;
+  const isClaimable = nowTime > claimTime;
+  const isMainCoin = pool.weiToken === NULL_ADDRESS;
+  const isMountedRef = useIsMountedRef();
 
   const [state, setState] = useState<IState>({
     amount: ZERO_NUMBER,
     balance: ZERO_NUMBER,
+    claimableAmount: ZERO_NUMBER,
   });
+  const isConnected = Boolean(account);
 
-  const onFinished = () => {
-    setState((prev) => ({ ...prev, amount: ZERO_NUMBER }));
+  const maxBuyableAmount = pool.maxWei.sub(
+    state.claimableAmount.div(pool.multiplier)
+  );
+
+  const maxAmount = maxBuyableAmount.gt(state.balance)
+    ? state.balance
+    : maxBuyableAmount;
+
+  const onRefresh = () => {
+    window.location.reload();
+  };
+
+  const loadClaimable = async () => {
+    if (!provider) return;
+    try {
+      const poolService = new PoolService(provider, account, pool.address);
+      const claimableAmount = await poolService.getClaimableAmount(
+        account || ""
+      );
+      if (isMountedRef.current === true)
+        setState((prev) => ({ ...prev, claimableAmount }));
+    } catch (error) {
+      console.warn(error);
+    }
   };
 
   useEffect(() => {
@@ -121,7 +151,7 @@ export const HeroSection = (props: IProps) => {
     const loadBalance = async () => {
       if (!provider) return;
       try {
-        if (isMainCoinAvax) {
+        if (isMainCoin) {
           const balance = await provider.getBalance(account || "");
           if (isMounted) setState((prev) => ({ ...prev, balance }));
         } else {
@@ -137,7 +167,9 @@ export const HeroSection = (props: IProps) => {
         if (isMounted) setState((prev) => ({ ...prev, balance: ZERO_NUMBER }));
       }
     };
+
     loadBalance();
+    loadClaimable();
     return () => {
       isMounted = false;
     };
@@ -145,99 +177,151 @@ export const HeroSection = (props: IProps) => {
   }, [account, networkId, provider]);
 
   const onMax = () => {
-    const maxValue = isMainCoinAvax
-      ? MaxAllocationPerWallet.gt(state.balance)
-        ? state.balance
-        : MaxAllocationPerWallet
-      : state.balance;
-    setState((prev) => ({ ...prev, amount: maxValue }));
+    setState((prev) => ({ ...prev, amount: maxAmount }));
   };
 
   const onChangeAmount = (amount: BigNumber) => {
     setState((prev) => ({ ...prev, amount }));
   };
 
-  const onJoin = async () => {
+  const onClaim = async () => {
     if (!provider) return;
-    const factoryAddress = getContractAddress(
-      networkId || DEFAULT_NETWORK_ID,
-      "factory"
-    );
-    const factoryService = new PoolFactoryService(provider, "", factoryAddress);
-    // try {
-    //   if (isMainCoinAvax) {
-    //     setTxModalData(true, "Investing ...", "Follow wallet instructions");
-    //     const txHash = await poolzService.investETH(
-    //       poolId,
-    //       state.amount,
-    //       account || ""
-    //     );
-    //     setTxModalData(
-    //       true,
-    //       "Investing ...",
-    //       "Please wait until the transaction is confirmed!",
-    //       txHash
-    //     );
-    //     await provider.waitForTransaction(txHash);
-    //     setTxModalData(true, "Reloading ...");
-    //     await reloadPoolInfo();
-    //     setTxModalData(false);
-    //   } else {
-    //     const erc20Service = new ERC20Service(provider, account, pool.weiToken);
-    //     setTxModalData(true, "Loading ...");
-
-    //     const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
-    //       account || "",
-    //       poolContractAddress,
-    //       state.amount
-    //     );
-
-    //     if (!hasEnoughAllowance) {
-    //       setTxModalData(
-    //         true,
-    //         "Approving tokens ...",
-    //         "Follow wallet instructions"
-    //       );
-    //       const txHash = await erc20Service.approveUnlimited(
-    //         poolContractAddress
-    //       );
-    //       setTxModalData(
-    //         true,
-    //         "Approving tokens ...",
-    //         "Please wait until the transaction is confirmed!",
-    //         txHash
-    //       );
-    //       await provider.waitForTransaction(txHash);
-    //     }
-    //     setTxModalData(true, "Investing ...", "Follow wallet instructions");
-    //     const txHash = await poolzService.investERC20(poolId, state.amount);
-    //     setTxModalData(
-    //       true,
-    //       "Investing ...",
-    //       "Please wait until the transaction is confirmed!",
-    //       txHash
-    //     );
-    //     await provider.waitForTransaction(txHash);
-    //     setTxModalData(true, "Reloading ...");
-    //     await reloadPoolInfo();
-    //     setTxModalData(false);
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    //   enqueueSnackbar((error || { message: "Something went wrong" }).message, {
-    //     variant: "error",
-    //   });
-    //   setTxModalData(false);
-    // }
+    const poolService = new PoolService(provider, account, pool.address);
+    try {
+      setTxModalData(true, "Loading ...", "Follow wallet instructions");
+      const txHash = await poolService.claim();
+      setTxModalData(
+        true,
+        "Waiting ...",
+        "Please wait until the transaction is confirmed!",
+        txHash
+      );
+      await loadClaimable();
+      enqueueSnackbar("You claimed your token successfully!");
+      setTxModalData(false);
+    } catch (error) {
+      console.warn(error);
+      enqueueSnackbar((error || { message: "Something went wrong" }).message, {
+        variant: "error",
+      });
+      setTxModalData(false);
+    }
   };
 
-  const isLive = true;
+  const onJoin = async () => {
+    if (!provider) return;
+    const poolService = new PoolService(provider, account, pool.address);
+
+    try {
+      if (isMainCoin) {
+        setTxModalData(true, "Loading ...", "Follow wallet instructions");
+        const txHash = await poolService.buyWithEth(state.amount);
+        setTxModalData(
+          true,
+          "Waiting ...",
+          "Please wait until the transaction is confirmed!",
+          txHash
+        );
+        await provider.waitForTransaction(txHash);
+      } else {
+        const erc20Service = new ERC20Service(provider, account, pool.weiToken);
+        setTxModalData(true, "Loading ...");
+
+        const hasEnoughAllowance = await erc20Service.hasEnoughAllowance(
+          account || "",
+          pool.address,
+          state.amount
+        );
+
+        if (!hasEnoughAllowance) {
+          setTxModalData(
+            true,
+            "Approving tokens ...",
+            "Follow wallet instructions"
+          );
+          const txHash = await erc20Service.approveUnlimited(pool.address);
+          setTxModalData(
+            true,
+            "Approving tokens ...",
+            "Please wait until the transaction is confirmed!",
+            txHash
+          );
+          await provider.waitForTransaction(txHash);
+        }
+        setTxModalData(true, "Loading ...", "Follow wallet instructions");
+        const txHash = await poolService.buy(state.amount);
+        setTxModalData(
+          true,
+          "Waiting ...",
+          "Please wait until the transaction is confirmed!",
+          txHash
+        );
+        await provider.waitForTransaction(txHash);
+      }
+      setTxModalData(true, "Reloading ...");
+      await loadClaimable();
+      await reloadPoolInfo();
+      setTxModalData(false);
+    } catch (error) {
+      console.warn(error);
+      enqueueSnackbar((error || { message: "Something went wrong" }).message, {
+        variant: "error",
+      });
+      setTxModalData(false);
+    }
+  };
 
   return (
     <div className={clsx(classes.root, props.className)}>
       <div className={classes.left}>
         <PoolItemDetails pool={pool} />
       </div>
+
+      {isFinished && (
+        <div className={classes.right}>
+          <div className={clsx(classes.rightContent, "center-wrapper")}>
+            <Typography className={classes.inputComment}>
+              You can claim soon:
+            </Typography>
+
+            <Timer
+              className={classes.time}
+              onFinished={onRefresh}
+              toTimestamp={claimTime}
+            />
+          </div>
+        </div>
+      )}
+
+      {isClaimable && (
+        <div className={classes.right}>
+          <div className={clsx(classes.rightContent, "center-wrapper")}>
+            {isConnected && (
+              <>
+                <Typography className={classes.inputComment}>
+                  Your claimable amount:&nbsp;
+                  {formatBigNumber(state.claimableAmount, pool.tokenDecimals)}
+                  &nbsp;
+                  {pool.tokenSymbol}
+                </Typography>
+                <br />
+              </>
+            )}
+            <Button
+              classes={{
+                disabled: classes.joinDisabled,
+              }}
+              color="primary"
+              disabled={isConnected && state.claimableAmount.isZero()}
+              fullWidth
+              onClick={account ? onClaim : onConnect}
+              variant="contained"
+            >
+              {account ? "Claim" : "Connect wallet and claim"}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {isLive && (
         <div className={classes.right}>
@@ -261,10 +345,8 @@ export const HeroSection = (props: IProps) => {
               }}
               color="primary"
               disabled={
-                state.amount.eq(ZERO_NUMBER) ||
-                state.amount.gt(state.balance) ||
-                state.amount.gt(MaxAllocationPerWallet) ||
-                state.amount.lt(MinAllocationPerWallet)
+                isConnected &&
+                (state.amount.eq(ZERO_NUMBER) || state.amount.gt(maxAmount))
               }
               fullWidth
               onClick={account ? onJoin : onConnect}
@@ -274,7 +356,7 @@ export const HeroSection = (props: IProps) => {
             </Button>
             <Timer
               className={classes.time}
-              onFinished={onFinished}
+              onFinished={onRefresh}
               toTimestamp={endTime}
             />
           </div>

@@ -2,16 +2,15 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Avatar, Typography, makeStyles } from "@material-ui/core";
 import { ReactComponent as UsersIcon } from "assets/svgs/users.svg";
 import clsx from "clsx";
-import { PrivateTag } from "components/Tag";
-import { PublicTag } from "components/Tag/PublicTag";
+import { PoolTypeTag } from "components/Tag";
 import { DEFAULT_DECIMALS, DEFAULT_NETWORK_ID } from "config/constants";
 import { getTokenFromAddress } from "config/networks";
 import { useConnectedWeb3Context, useGlobal } from "contexts";
 import React from "react";
 import { IPool } from "types";
 import { formatBigNumber, formatToShortNumber, shortenAddress } from "utils";
-import { EPoolType } from "utils/enums";
-import { ETH_NUMBER, ZERO_NUMBER } from "utils/number";
+import { ETH_NUMBER } from "utils/number";
+import { getLeftTokens } from "utils/pool";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -26,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     width: 40,
     height: 40,
+    border: `2px solid ${theme.colors.third}`,
   },
   title: {
     margin: "0 24px",
@@ -103,32 +103,33 @@ export const PoolItemDetails = (props: IProps) => {
     pool.weiToken
   );
   const isUpcoming = startTime > nowTime;
-  const isPrivate = pool ? pool.poolType === EPoolType.Private : false;
 
-  // const percentNumber = pool.tokenTarget
-  //   .sub(pool.leftTokens)
-  //   .mul(BigNumber.from(100))
-  //   .div(pool.tokenTarget);
-  // const percent = percentNumber.toNumber();
+  const leftTokens = getLeftTokens(pool);
 
-  // const tokenPrice = (price as any)[mainToken.symbol.toLowerCase()].price;
-  // const totalRaised = isUpcoming
-  //   ? pool.tokenTarget.mul(tokenPrice).div(pool.rate).div(ETH_NUMBER)
-  //   : pool.tokenTarget
-  //       .sub(pool.leftTokens)
-  //       .mul(tokenPrice)
-  //       .div(pool.rate)
-  //       .div(ETH_NUMBER);
+  const percentNumber = pool.tokenTarget
+    .sub(leftTokens)
+    .mul(BigNumber.from(100))
+    .div(pool.tokenTarget);
+  const percent = percentNumber.toNumber();
 
-  // const totalRaisedStr = formatToShortNumber(
-  //   formatBigNumber(totalRaised, DEFAULT_DECIMALS)
-  // );
+  const tokenPrice = (price as any)[mainToken.symbol.toLowerCase()].price;
+  const totalRaised = isUpcoming
+    ? pool.tokenTarget.mul(tokenPrice).div(pool.multiplier).div(ETH_NUMBER)
+    : pool.tokenTarget
+        .sub(leftTokens)
+        .mul(tokenPrice)
+        .div(pool.multiplier)
+        .div(ETH_NUMBER);
+
+  const totalRaisedStr = formatToShortNumber(
+    formatBigNumber(totalRaised, DEFAULT_DECIMALS)
+  );
 
   return (
     <div className={clsx(classes.root, props.className)}>
-      {/* <div className={classes.row}>
+      <div className={classes.row}>
         <Avatar className={classes.avatar} src={pool.logo} />
-        <Typography className={classes.title}>{pool.tokenName}</Typography>
+        <Typography className={classes.title}>{pool.name}</Typography>
         <Typography className={classes.address}>
           {shortenAddress(pool.token)}
         </Typography>
@@ -137,8 +138,8 @@ export const PoolItemDetails = (props: IProps) => {
         <div>
           <Typography className={classes.comment}>Swap ratio</Typography>
           <Typography className={classes.value}>
-            1{mainToken.symbol.toUpperCase()} ={" "}
-            {formatToShortNumber(formatBigNumber(pool.rate, 0))}{" "}
+            1{mainToken.symbol.toUpperCase()} =&nbsp;
+            {formatToShortNumber(formatBigNumber(pool.multiplier, 0))}&nbsp;
             {pool.tokenSymbol}
           </Typography>
         </div>
@@ -171,9 +172,9 @@ export const PoolItemDetails = (props: IProps) => {
             {pool.totalMembers.toNumber()}
           </span>
           <UsersIcon />
-          {isPrivate ? <PrivateTag /> : <PublicTag />}
+          <PoolTypeTag poolType={pool.poolType} />
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

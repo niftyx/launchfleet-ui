@@ -18,22 +18,18 @@ interface IProps {
 
 export const UpcomingPools = (props: IProps) => {
   const classes = useStyles();
-  const { library: provider, networkId } = useConnectedWeb3Context();
-  const { loading: upcomingPoolIdsLoading, upcomingPoolIds } = useUpcomingPools(
-    provider,
-    networkId
-  );
+  const { loading: upcomingPoolIdsLoading, pools } = useUpcomingPools();
   return (
     <div className={clsx(classes.root, props.className)}>
       <Grid container spacing={3}>
-        {upcomingPoolIdsLoading && upcomingPoolIds.length === 0 && (
+        {upcomingPoolIdsLoading && pools.length === 0 && (
           <Grid item md={4} sm={6} xs={12}>
             <SimpleLoader />
           </Grid>
         )}
-        {upcomingPoolIds.map((poolId) => (
-          <Grid item key={`${poolId.toHexString()}`} md={4} sm={6} xs={12}>
-            <UpcomingPoolItem poolId={poolId} />
+        {pools.map((pool) => (
+          <Grid item key={pool.id} md={4} sm={6} xs={12}>
+            <UpcomingPoolItem pool={pool} />
           </Grid>
         ))}
         <Hidden xsDown>

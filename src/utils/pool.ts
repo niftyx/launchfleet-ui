@@ -1,9 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
-import { MIN_CALC_TOKENS } from "config/constants";
 import { IPool } from "types";
-
-import { BigNumberMax, BigNumberMin, ZERO_NUMBER } from "./number";
-import { NULL_ADDRESS } from "./token";
 
 export const getRemainingTimeStr = (time: number): string => {
   return [
@@ -17,51 +13,39 @@ export const getRemainingTimeStr = (time: number): string => {
     .join(" : ");
 };
 
-export const getMinMaxAllocationPerWallet = (
-  pool: IPool,
-  globalConfig: {
-    MinETHInvest: BigNumber;
-    MaxETHInvest: BigNumber;
-    MinERC20Invest: BigNumber;
-    MaxERC20Invest: BigNumber;
-  },
-  isPrivate: boolean
-): {
-  MinAllocationPerWallet: BigNumber;
-  MaxAllocationPerWallet: BigNumber;
-} => {
-  const result = {
-    MinAllocationPerWallet: ZERO_NUMBER,
-    MaxAllocationPerWallet: ZERO_NUMBER,
-  };
+export const getLeftTokens = (pool: IPool): BigNumber => {
+  return pool.tokenTarget.sub(pool.totalOwed);
+};
 
-  const rate = pool.multiplier;
-  const leftTokens = ZERO_NUMBER;
-
-  const maxAllocation = leftTokens.div(rate);
-  const minAllocation = MIN_CALC_TOKENS.div(rate);
-
-  const isMainToken = pool.weiToken === NULL_ADDRESS;
-
-  if (isMainToken) {
-    result.MinAllocationPerWallet = BigNumberMax(
-      globalConfig.MinETHInvest,
-      minAllocation
+export const isPoolFiltered = (pool: IPool, keyword: string): boolean => {
+  if (keyword === "") return true;
+  const fKeyword = keyword.toLowerCase();
+  try {
+    return (
+      (pool.name || "").toLowerCase().includes(fKeyword) ||
+      pool.id.toLowerCase().includes(fKeyword) ||
+      pool.token.toLowerCase().includes(fKeyword) ||
+      pool.tokenSymbol.toLowerCase().includes(fKeyword)
     );
-    result.MaxAllocationPerWallet = BigNumberMin(
-      globalConfig.MaxETHInvest,
-      maxAllocation
-    );
-  } else {
-    result.MinAllocationPerWallet = BigNumberMax(
-      globalConfig.MinERC20Invest,
-      minAllocation
-    );
-    result.MaxAllocationPerWallet = BigNumberMin(
-      globalConfig.MaxERC20Invest,
-      maxAllocation
-    );
+  } catch (error) {
+    return false;
   }
+};
 
-  return result;
+export const getPoolTypeConfigTexts = (baseStr: string) => {
+  return [
+    {
+      name: "Private",
+      hint:
+        "Owner can add wallets to whitelists and only white-listed users can participate in the pool.",
+    },
+    {
+      name: "LAUNCH Holders",
+      hint: `Users than own ${baseStr} LAUNCH token can participate in the pool.`,
+    },
+    {
+      name: "Public",
+      hint: "Any users can participate in the pool.",
+    },
+  ];
 };

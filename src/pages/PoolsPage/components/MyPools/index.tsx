@@ -1,9 +1,9 @@
-import { makeStyles } from "@material-ui/core";
+import { Button, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
 import { PoolItem, SearchBar, SimpleLoader } from "components";
-import { useConnectedWeb3Context } from "contexts";
 import { useMyPools } from "hooks";
 import React, { useState } from "react";
+import { isPoolFiltered } from "utils/pool";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -27,15 +27,15 @@ interface IState {
 const MyPools = () => {
   const classes = useStyles();
   const [state, setState] = useState<IState>({ keyword: "" });
-  const { account, library: provider, networkId } = useConnectedWeb3Context();
-  const { loading: myPoolsLoading, myPoolIds } = useMyPools(
-    provider,
-    account || "",
-    networkId
-  );
+
+  const { hasMore, loadMorePools, loading, pools } = useMyPools();
 
   const setKeyword = (keyword: string) =>
     setState((prev) => ({ ...prev, keyword }));
+
+  const filteredPools = pools.filter((pool) =>
+    isPoolFiltered(pool, state.keyword)
+  );
 
   return (
     <div className={clsx(classes.root)}>
@@ -44,14 +44,21 @@ const MyPools = () => {
         value={state.keyword}
       />
       <div className={classes.content}>
-        {myPoolsLoading && myPoolIds.length === 0 ? (
-          <SimpleLoader />
-        ) : (
-          myPoolIds.map((poolId) => (
-            <PoolItem key={poolId.toHexString()} poolId={poolId} />
-          ))
-        )}
+        {filteredPools.map((pool) => (
+          <PoolItem key={pool.id} pool={pool} />
+        ))}
+        {loading && <SimpleLoader />}
       </div>
+      {hasMore && (
+        <Button
+          className={classes.loadMore}
+          fullWidth
+          onClick={loadMorePools}
+          variant="contained"
+        >
+          Load more pools
+        </Button>
+      )}
     </div>
   );
 };

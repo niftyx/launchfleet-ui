@@ -9,8 +9,9 @@ export enum THEME {
 
 export enum EPoolDetailsTab {
   PoolDetails = "Pool details",
-  AboutProject = "About the project",
+  AboutPool = "About the pool",
   YourAllocations = "Your allocations",
+  Manage = "Manage",
 }
 
 export enum ECreatePoolStep {
@@ -23,11 +24,9 @@ export enum ECreatePoolStep {
 
 export enum EPoolStatus {
   Created = "Created",
-  Open = "Open",
-  PreMade = "Upcoming",
-  OutOfstock = "OutOfstock",
+  Active = "Active",
   Finished = "Finished",
-  Close = "Close",
+  Claimable = "Claimable",
 }
 
 export enum EPoolType {

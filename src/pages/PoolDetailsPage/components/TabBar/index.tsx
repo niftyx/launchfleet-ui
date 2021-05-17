@@ -3,12 +3,16 @@ import clsx from "clsx";
 import { useConnectedWeb3Context } from "contexts";
 import { transparentize } from "polished";
 import React, { useEffect } from "react";
+import useCommonStyles from "styles/common";
+import { IPool } from "types";
 import { EPoolDetailsTab } from "utils/enums";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     alignItems: "center",
+    overflowX: "auto",
+    paddingBottom: 8,
     "& > * + *": {
       marginLeft: 32,
     },
@@ -20,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "8px 0",
     position: "relative",
     color: theme.colors.third,
+    whiteSpace: "nowrap",
     "&::after": {
       content: `" "`,
       position: "absolute",
@@ -64,13 +69,15 @@ interface IProps {
   className?: string;
   tab: EPoolDetailsTab;
   onChangeTab: (_: EPoolDetailsTab) => void;
+  pool: IPool;
 }
 
 export const TabBar = (props: IProps) => {
   const classes = useStyles();
+  const commonClasses = useCommonStyles();
   const { account } = useConnectedWeb3Context();
   const isConnected = !!account;
-  const { onChangeTab, tab } = props;
+  const { onChangeTab, pool, tab } = props;
 
   useEffect(() => {
     if (!isConnected && tab === EPoolDetailsTab.YourAllocations) {
@@ -80,9 +87,24 @@ export const TabBar = (props: IProps) => {
   }, [isConnected]);
 
   return (
-    <div className={clsx(classes.root, props.className)}>
+    <div
+      className={clsx(
+        commonClasses.scrollHorizontal,
+        classes.root,
+        props.className
+      )}
+    >
       {Object.values(EPoolDetailsTab)
-        .filter((e) => e !== EPoolDetailsTab.YourAllocations || isConnected)
+        .filter((e) => {
+          switch (e) {
+            case EPoolDetailsTab.Manage:
+              return pool.creator === (account || "").toLowerCase();
+            case EPoolDetailsTab.YourAllocations:
+              return isConnected;
+            default:
+              return true;
+          }
+        })
         .map((e) => (
           <div
             className={clsx(classes.item, tab === e ? "active" : "")}

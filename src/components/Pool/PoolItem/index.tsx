@@ -1,21 +1,15 @@
-import { BigNumber } from "@ethersproject/bignumber";
 import { Avatar, Hidden, Typography, makeStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { SimpleLoader } from "components/Loader";
 import {
   PoolPriceTag,
   PoolRaisedTag,
   PoolStatusTag,
-  PrivateTag,
+  PoolTypeTag,
 } from "components/Tag";
 import { PoolJoinedStatusTag } from "components/Tag/PoolJoinedStatusTag";
-import { PublicTag } from "components/Tag/PublicTag";
-import { useConnectedWeb3Context } from "contexts";
-import { usePoolDetails } from "hooks";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { EPoolType } from "utils/enums";
-import { ZERO_NUMBER } from "utils/number";
+import { IPool } from "types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,6 +48,8 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     width: 40,
     height: 40,
+    backgroundColor: theme.colors.primary,
+    border: `1px solid ${theme.colors.sixth}`,
   },
   title: {
     margin: "0 24px",
@@ -97,39 +93,29 @@ const useStyles = makeStyles((theme) => ({
 
 interface IProps {
   className?: string;
-  poolId: BigNumber;
+  pool: IPool;
 }
 
 export const PoolItem = (props: IProps) => {
   const classes = useStyles();
-  const { library: provider, networkId } = useConnectedWeb3Context();
-  const { poolId } = props;
-  const { loading: poolLoading, pool } = usePoolDetails(
-    poolId,
-    networkId,
-    provider
-  );
+  const { pool } = props;
 
-  const finishTime = pool ? pool.endTime.toNumber() : 0;
-  const startTime = pool ? pool.startTime.toNumber() : 0;
+  const finishTime = pool.endTime.toNumber();
+  const startTime = pool.startTime.toNumber();
   const nowTime = Math.floor(Date.now() / 1000);
   const isActive = startTime <= nowTime && nowTime < finishTime;
 
-  const isPrivate = pool ? pool.poolType === EPoolType.Private : false;
-
   const renderContent = () => {
-    if (!pool) return null;
-
     return (
       <>
         <Hidden mdUp>
           <div className={classes.row}>
             <Avatar className={classes.avatar} src={pool.logo} />
-            <Typography className={classes.title}>{pool.tokenName}</Typography>
+            <Typography className={classes.title}>{pool.name}</Typography>
             <PoolRaisedTag pool={pool} />
           </div>
           <div className={classes.row}>
-            {isPrivate ? <PrivateTag /> : <PublicTag />}
+            <PoolTypeTag poolType={pool.poolType} />
             <PoolStatusTag pool={pool} />
           </div>
           <div className={classes.row}>
@@ -144,7 +130,7 @@ export const PoolItem = (props: IProps) => {
             <PoolStatusTag pool={pool} />
           </div>
           <div className={clsx(classes.itemWrapper, "tag")}>
-            {isPrivate ? <PrivateTag /> : <PublicTag />}
+            <PoolTypeTag poolType={pool.poolType} />
           </div>
           <div className={clsx(classes.itemWrapper, "price")}>
             <PoolPriceTag pool={pool} />
@@ -152,7 +138,6 @@ export const PoolItem = (props: IProps) => {
           <div className={clsx(classes.itemWrapper, "status")}>
             <PoolJoinedStatusTag pool={pool} />
           </div>
-
           <div className={clsx(classes.itemWrapper, "raised")}>
             <PoolRaisedTag pool={pool} />
           </div>
@@ -164,13 +149,9 @@ export const PoolItem = (props: IProps) => {
   return (
     <NavLink
       className={clsx(classes.root, props.className, isActive ? "active" : "")}
-      to={`/pool/${poolId.toHexString()}`}
+      to={`/pool/${pool.id}`}
     >
-      {poolLoading ? (
-        <SimpleLoader className={classes.spinner} />
-      ) : (
-        renderContent()
-      )}
+      {renderContent()}
     </NavLink>
   );
 };

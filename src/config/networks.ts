@@ -9,6 +9,8 @@ import {
 import { NULL_ADDRESS } from "utils/token";
 import { entries } from "utils/type-utils";
 
+import { DEFAULT_NETWORK_ID } from "./constants";
+
 export const networkIds = {
   MATIC: 137,
   MUMBAI: 80001,
@@ -205,11 +207,12 @@ export const getEtherscanUri = (networkId: number): string => {
 };
 
 export const getGraphUris = (
-  networkId: number
+  networkId?: number
 ): { httpUri: string; wsUri: string } => {
-  if (!validNetworkId(networkId)) {
-    throw new Error(`Unsupported network id: '${networkId}'`);
+  const finalNetworkId = networkId || DEFAULT_NETWORK_ID;
+  if (!validNetworkId(finalNetworkId)) {
+    throw new Error(`Unsupported network id: '${finalNetworkId}'`);
   }
 
-  return networks[networkId].thegraph;
+  return networks[finalNetworkId].thegraph;
 };

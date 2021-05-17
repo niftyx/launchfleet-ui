@@ -59,7 +59,7 @@ export const PoolPriceTag = (props: IProps) => {
         Price: ${Number(formatBigNumber(tokenPrice, DEFAULT_DECIMALS, 6))}
       </div>
       <div className={classes.label}>
-        1 {mainToken.symbol} ={" "}
+        1 {mainToken.symbol} =&nbsp;
         {formatToShortNumber(formatBigNumber(multiplier, 0, 0))} {tokenSymbol}
       </div>
     </div>

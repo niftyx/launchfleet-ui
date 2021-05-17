@@ -67,6 +67,10 @@ export interface IGlobalData {
     address: string;
     amount: BigNumber;
   };
+  feeInfo: {
+    feePercent: BigNumber;
+    feeRecipient: string;
+  };
 }
 
 export interface IBasePool {
@@ -92,8 +96,9 @@ export interface IBasePool {
 }
 
 export interface IPool {
-  poolId: string;
-
+  poolId: BigNumber; // remove
+  id: string;
+  address: string;
   creator: string;
   token: string;
   tokenTarget: BigNumber;
@@ -107,7 +112,12 @@ export interface IPool {
   claimTime: BigNumber;
   meta: string;
 
+  totalOwed: BigNumber;
+  weiRaised: BigNumber;
+
   logo: string;
+  name: string;
+  description: string;
   //
   tokenName: string;
   tokenSymbol: string;

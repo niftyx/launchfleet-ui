@@ -1,58 +1,145 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import {
-  DEFAULT_DECIMALS,
-  DEFAULT_NETWORK_ID,
-  DEFAULT_READONLY_PROVIDER,
-} from "config/constants";
-import { getContractAddress } from "config/networks";
+import { gql, useQuery } from "@apollo/client";
+import axios from "axios";
+import { DEFAULT_READONLY_PROVIDER } from "config/constants";
+import { useConnectedWeb3Context } from "contexts";
 import { useIsMountedRef } from "hooks/useIsMountedRef";
 import { useEffect, useState } from "react";
 import { ERC20Service } from "services/erc20";
-import { PoolFactoryService } from "services/poolFactory";
 import { IPool } from "types";
-import { EPoolStatus } from "utils/enums";
-import { MAX_NUMBER, ZERO_NUMBER } from "utils/number";
-import { NULL_ADDRESS } from "utils/token";
+import { wranglePool } from "utils/thegraph";
+
+const query = gql`
+  query GetPool($id: ID!) {
+    pool(id: $id) {
+      id
+      address
+      creator
+      token
+      tokenTarget
+      multiplier
+      weiToken
+      minWei
+      maxWei
+      poolType
+      startTime
+      endTime
+      claimTime
+      meta
+      totalOwed
+      weiRaised
+      totalMembers
+      createTimestamp
+      updateTimestamp
+    }
+  }
+`;
+
+interface GraphResponse {
+  pool: IPool;
+}
 
 interface IState {
-  pool?: IPool;
   loading: boolean;
+  pool?: IPool;
+  forceUpdate: boolean;
 }
 
 export const usePoolDetails = (
-  id: BigNumber,
-  networkId?: number,
-  provider?: any
+  id: string
 ): IState & {
-  load: () => Promise<void>;
+  reload: () => Promise<void>;
 } => {
   const [state, setState] = useState<IState>({
-    loading: false,
+    loading: true,
+    forceUpdate: false,
   });
-
+  const { account, library: provider, networkId } = useConnectedWeb3Context();
+  const { data, error, loading, refetch } = useQuery<GraphResponse>(query, {
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network",
+    skip: false,
+    variables: { id },
+  });
   const isMountedRef = useIsMountedRef();
 
-  const loadPoolDetails = async () => {
-    if (id.eq(MAX_NUMBER)) {
-      return;
-    }
-    const factoryAddress = getContractAddress(
-      networkId || DEFAULT_NETWORK_ID,
-      "factory"
-    );
-    const factoryService = new PoolFactoryService(
-      provider || DEFAULT_READONLY_PROVIDER,
-      "",
-      factoryAddress
-    );
+  const loadMeta = async (pool: IPool): Promise<IPool> => {
+    const updatedPool = { ...pool };
 
-    setState((prev) => ({ ...prev, loading: true }));
+    const erc20 = new ERC20Service(
+      provider || DEFAULT_READONLY_PROVIDER,
+      account,
+      pool.token
+    );
+    const profile = await erc20.getProfileSummary();
+    if (profile !== null) {
+      updatedPool.tokenDecimals = profile.decimals;
+      updatedPool.tokenSymbol = profile.symbol;
+      updatedPool.tokenName = profile.name;
+    }
+    try {
+      const totalSupply = await erc20.getTotalSupply();
+      updatedPool.tokenTotalSupply = totalSupply;
+    } catch (error) {
+      console.warn(error);
+    }
+
+    let metaDetails = {};
+    try {
+      metaDetails = (await axios.get(pool.meta)).data;
+      return { ...updatedPool, ...metaDetails };
+    } catch (error) {
+      console.error(error);
+      return updatedPool;
+    }
+  };
+
+  const reload = async () => {
+    try {
+      setState((prev) => ({
+        ...prev,
+        loading: true,
+        forceUpdate: true,
+      }));
+      await refetch();
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
+    }
   };
 
   useEffect(() => {
-    loadPoolDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id.toHexString(), networkId]);
+    const updateData = async () => {
+      if (error) {
+        setState((prev) => ({ ...prev, loading: false }));
+      } else if (data) {
+        if (data.pool.id) {
+          if (
+            !state.pool ||
+            state.pool.id !== data.pool.id ||
+            state.forceUpdate
+          ) {
+            // get meta info
+            setState((prev) => ({
+              ...prev,
+              loading: true,
+            }));
+            const updatedPool = await loadMeta(wranglePool(data.pool));
+            if (isMountedRef.current === true) {
+              setState((prev) => ({
+                ...prev,
+                loading: false,
+                pool: updatedPool,
+                forceUpdate: false,
+              }));
+            }
+          }
+        }
+      }
+    };
+    updateData();
+  }, [data, error]);
 
-  return { ...state, load: loadPoolDetails };
+  return { ...state, reload };
 };

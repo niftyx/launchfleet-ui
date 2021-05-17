@@ -59,6 +59,10 @@ const defaultData: IGlobalData = {
     address: NULL_ADDRESS,
     amount: ZERO_NUMBER,
   },
+  feeInfo: {
+    feePercent: ZERO_NUMBER,
+    feeRecipient: NULL_ADDRESS,
+  },
 };
 
 const GlobalContext = createContext({
@@ -177,6 +181,23 @@ export const GlobalProvider = ({ children }: IProps) => {
         setCurrentData((prev) => ({
           ...prev,
           baseTokenInfo: defaultData.baseTokenInfo,
+        }));
+      }
+    }
+
+    try {
+      const feeInfo = await factoryService.getFeeInfo();
+      if (isRefMounted.current === true) {
+        setCurrentData((prev) => ({
+          ...prev,
+          feeInfo: feeInfo,
+        }));
+      }
+    } catch (error) {
+      if (isRefMounted.current === true) {
+        setCurrentData((prev) => ({
+          ...prev,
+          feeInfo: defaultData.feeInfo,
         }));
       }
     }
