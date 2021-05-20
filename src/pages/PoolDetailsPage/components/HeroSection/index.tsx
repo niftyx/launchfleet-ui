@@ -196,8 +196,10 @@ export const HeroSection = (props: IProps) => {
         "Please wait until the transaction is confirmed!",
         txHash
       );
-      await loadClaimable();
+      await provider.waitForTransaction(txHash);
       enqueueSnackbar("You claimed your token successfully!");
+      setTxModalData(true, "Reloading ...");
+      await loadClaimable();
       setTxModalData(false);
     } catch (error) {
       console.warn(error);

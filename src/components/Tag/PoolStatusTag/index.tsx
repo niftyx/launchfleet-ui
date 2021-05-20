@@ -48,13 +48,14 @@ export const PoolStatusTag = (props: IProps) => {
   const timestamp = Math.ceil(Date.now() / 1000);
   let status = EPoolStatus.Created;
 
-  if (timestamp > startTime.toNumber()) {
-    status = EPoolStatus.Active;
+  if (timestamp > claimTime.toNumber()) {
+    status = EPoolStatus.Claimable;
   } else if (timestamp > endTime.toNumber()) {
     status = EPoolStatus.Finished;
-  } else if (timestamp > claimTime.toNumber()) {
-    status = EPoolStatus.Claimable;
+  } else if (timestamp > startTime.toNumber()) {
+    status = EPoolStatus.Active;
   }
+
   return (
     <div className={clsx(classes.root, props.className)}>
       <span className={clsx(classes.tag, status.toLowerCase())}></span>
