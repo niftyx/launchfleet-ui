@@ -1,3 +1,5 @@
+### [Deprecation Notice] - Legacy repo for the Niftyx Launchpad (codename launchfleet) which was scheduled to go live on Polygon in Q2'2021.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
